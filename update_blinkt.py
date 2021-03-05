@@ -42,8 +42,8 @@ def price_to_colour(price):
 
 try:
     # connect to the database in rw mode so we can catch the error if it doesn't exist
-    dburi = 'file:{}?mode=rw'.format(pathname2url('agileprices.sqlite'))
-    conn = sqlite3.connect(dburi, uri=True)
+    DB_URI = 'file:{}?mode=rw'.format(pathname2url('agileprices.sqlite'))
+    conn = sqlite3.connect(DB_URI, uri=True)
     cursor = conn.cursor()
     print('Connected to database...')
 except sqlite3.OperationalError as error:
@@ -67,10 +67,11 @@ i = 0
 
 for row in rows:
     print(str(i) + ": " + str(row[1]) + "p - " + str(price_to_colour(row[1])))
-    r = colourmap[price_to_colour(row[1])]['r']
-    g = colourmap[price_to_colour(row[1])]['g']
-    b = colourmap[price_to_colour(row[1])]['b']
-    blinkt.set_pixel(i, r, g, b, BRIGHTNESS/100)
+    PIXEL_VALUE_RED = colourmap[price_to_colour(row[1])]['r']
+    PIXEL_VALUE_GREEN = colourmap[price_to_colour(row[1])]['g']
+    PIXEL_VALUE_BLUE = colourmap[price_to_colour(row[1])]['b']
+    blinkt.set_pixel(i, PIXEL_VALUE_RED,
+        PIXEL_VALUE_GREEN, PIXEL_VALUE_BLUE, BRIGHTNESS/100)
     i += 1
 
 print ("Setting display...")
