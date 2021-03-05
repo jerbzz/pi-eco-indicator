@@ -48,7 +48,7 @@ try:
     print('Connected to database...')
 except sqlite3.OperationalError as error:
     # handle missing database case
-    raise SystemExit('Database not found - you need to run store-prices.py first.') from error
+    raise SystemExit('Database not found - you need to run store_prices.py first.') from error
 
 cursor.execute("SELECT * FROM prices WHERE valid_from > datetime('now', '-30 minutes') LIMIT 8")
 rows = cursor.fetchall()
