@@ -1,5 +1,7 @@
 # agile-blinkt-indicator
-Display upcoming Octopus Agile prices on the Pimoroni Blinkt! display for Raspberry Pi
+Display upcoming Octopus Agile prices on the Pimoroni Blinkt! display for Raspberry Pi.
+
+![Display in action](https://raw.githubusercontent.com/jerbzz/agile-blinkt-indicator/main/images/DSC_5094.jpg)
 
 # Hardware needed
 
