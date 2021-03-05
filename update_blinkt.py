@@ -17,7 +17,7 @@ colourmap = { 'magenta': { 'r': 155, 'g': 0, 'b': 200 },
               'orange': { 'r': 255, 'g': 30, 'b': 0 },
               'yellow': { 'r': 180, 'g': 100, 'b': 2 },
               'green': { 'r': 0, 'g': 255, 'b': 0 },
-              'cyan': { 'r': 0, 'g': 0, 'b': 255 },
+              'cyan': { 'r': 0, 'g': 255, 'b': 255 },
               'blue': { 'r': 0, 'g': 0, 'b': 255 }, }
 
 def price_to_colour(price):
