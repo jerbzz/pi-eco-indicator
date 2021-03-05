@@ -73,7 +73,7 @@ I really can't be bothered to make a systemd timer/service for this. `cron` is s
 Run `crontab -e` and do something like this (don't forget to update your region code:)
 
 ```
-@reboot /bin/sleep 30; cd /home/pi/agile-blinkt-indicator && /usr/bin/python3 store_prices.py --region B > ./blinkt.log 2>&1
+@reboot /bin/sleep 30; cd /home/pi/agile-blinkt-indicator && /usr/bin/python3 store_prices.py --region X > ./blinkt.log 2>&1
 @reboot /bin/sleep 40; cd /home/pi/agile-blinkt-indicator && /usr/bin/python3 update_blinkt.py > ./blinkt.log 2>&1
 */30 * * * * /bin/sleep 5; cd /home/pi/agile-blinkt-indicator && /usr/bin/python3 update_blinkt.py > ./blinkt.log 2>&1
 30 16 * * * cd /home/pi/agile-blinkt-indicator && /usr/bin/python3 store_prices.py > ./blinkt.log 2>&1
