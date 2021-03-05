@@ -60,7 +60,11 @@ Then, a separate command to update the display:
 ./update_blinkt.py
 ```
 
-This will also tell you what it's doing, as well as showing you the colours it is setting. If you want to see all the colours available, you can run `./update_blinkt --demo`
+This will also tell you what it's doing, as well as showing you the colours it is setting. If you want to see all the colours available, you can run 
+
+```
+./update_blinkt --demo
+```
 
 If it's all a bit much, you can blank the display:
 
