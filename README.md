@@ -16,19 +16,24 @@ Magenta is the most expensive, then red if it's under 28p, orange if it's under 
 
 - This has been tested on Raspberry Pi OS Buster only.
 - You will need the Pimoroni Blinkt! Python library, https://github.com/pimoroni/blinkt
-- Install the Blinkt! library like so:
+- Install the Blinkt! library like so, making sure you answer YES to the questions.
 ```
 curl https://get.pimoroni.com/blinkt | bash
 ```
 
-# How to use this code
-
-This code runs unprivileged - no sudo required. Copy it to your home directory in a folder of your choice. It will drop a SQLite database file in there when it runs.
-
-Make the files executable:
+# How to get this code
+Once you have installed the Blinkt! software as above, the easiest way to download this software is to type the following commands, which will make a copy of all the files in a folder called **agile-blinkt-indicator** in your home directory.
 
 ```
-chmod +x *.py
+cd ~ && git clone https://github.com/jerbzz/agile-blinkt-indicator.git
+```
+
+# How to use this code
+
+This code runs unprivileged - no sudo required. It will drop a SQLite database file in there when it runs. Make the files executable:
+
+```
+cd ~/agile-blinkt-indicator && chmod +x *.py
 ```
 
 (https://en.wikipedia.org/wiki/Distribution_network_operator):  
