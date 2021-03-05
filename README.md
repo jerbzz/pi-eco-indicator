@@ -88,6 +88,6 @@ If it stops working, log in and run it manually and see what it moans about!
 
 # Thanks to:
 
-Garry Hayne on the Octopus Agile forums (https://forum.octopus.energy) for the original idea
+Garry Hayne on the Octopus Agile forums (https://forum.octopus.energy) for the original idea  
 pufferfish-tech's **octopus-agile-pi-prices** for inspiration (https://github.com/pufferfish-tech/octopus-agile-pi-prices)
 
