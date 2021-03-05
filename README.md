@@ -10,7 +10,7 @@ Magenta is the most expensive, then red if it's under 28p, orange if it's under 
 # Hardware needed
 
 - Pimoroni Blinkt!, https://shop.pimoroni.com/products/blinkt
-- A Raspberry Pi of any flavour, as long as you can connect the Blinkt! to it. This has been tested on a Pi Zero W and a Pi 3B+.
+- A Raspberry Pi of any flavour, as long as you can connect the Blinkt! to it, and it can connect to the internet. This has been tested on a Pi Zero W and a Pi 3B+.
 
 # Software needed
 
