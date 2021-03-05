@@ -97,7 +97,50 @@ You can check it's worked by running `crontab -l`, you should see this:
 - line 3: wait till 5 seconds past every half hour and update the display
 - lines 4, 5, and 6: update the price database at 4.30pm, 6.30pm, and 8.30pm to cover late arrival of data
 
-If anything stops working, log in and run `store_prices.py` and `update_blinkt.py` and see what they moan about!
+# Troubleshooting
+
+If something isn't working, run 
+```
+less ~/agile-blinkt-indicator/blinkt.log
+```
+This will show you the most recent message from any of the scripts (that were run automatically by `cron`). If this doesn't shed any light, run `./store_prices.py` and `./update_blinkt.py` and see what they moan about!
+
+# Modification
+
+If you want to change price thresholds or fine-tune the colours, they are located in `update_blinkt.py`. Open it using `nano update_blinkt.py` or your favourite editor. 
+
+## Colours
+Look for this part:
+```
+colourmap = { 'magenta': { 'r': 155, 'g': 0, 'b': 200 },
+              'red': { 'r': 255, 'g': 0, 'b': 0 },
+              'orange': { 'r': 255, 'g': 30, 'b': 0 },
+              'yellow': { 'r': 180, 'g': 100, 'b': 0 },
+              'green': { 'r': 0, 'g': 255, 'b': 0 },
+              'cyan': { 'r': 0, 'g': 160, 'b': 180 },
+              'blue': { 'r': 0, 'g': 0, 'b': 255 }, }
+```
+**Don't change the names of the colours**. Change the numbers and nothing else. Anything between 0 and 255 is fine, anything else may produce "interesting" results. 0 means none of that colour, 255 means all of it (modified by the `BRIGHTNESS` setting further up the file). Remember you can test the colours by running `./update_blinkt.py --demo`
+
+## Prices
+Look for this part:
+```
+    if price > 28:
+        return 'magenta'
+    if 28 >= price > 17:
+        return 'red'
+    if 17 >= price > 13.5:
+        return 'orange'
+    if 13.5 >= price > 10:
+        return 'yellow'
+    if 10 >= price > 5:
+        return 'green'
+    if 5 >= price > 0:
+        return 'cyan'
+    if price <= 0:
+        return 'blue'
+```
+**Don't change the names of the colours**. Change the numbers and nothing else. The main thing to be sure of here is you don't have any gaps or overlaps in the price bands - you'll end up with undefined behaviour at that point.
 
 # To Do:
 
