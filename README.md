@@ -31,8 +31,6 @@ Make the files executable:
 chmod +x *.py
 ```
 
-You should initially run manually to check everything works, replacing X with your DNO region:
-
 (https://en.wikipedia.org/wiki/Distribution_network_operator):  
 A = East England  
 B = East Midlands  
@@ -49,6 +47,7 @@ K = South Wales
 L = South West England  
 M = Yorkshire  
 
+You should initially run manually to check everything works, replacing X with your DNO region:
 ```
 ./store_prices.py --region X
 ```
@@ -61,7 +60,8 @@ Then, a separate command to update the display:
 ./update_blinkt.py
 ```
 
-This will also tell you what it's doing, as well as showing you the colours it is setting.
+This will also tell you what it's doing, as well as showing you the colours it is setting. If you want to see all the colours available, you can run `./update_blinkt --demo`
+
 If it's all a bit much, you can blank the display:
 
 ```
