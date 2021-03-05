@@ -33,7 +33,7 @@ cd ~ && git clone https://github.com/jerbzz/agile-blinkt-indicator.git
 This code runs unprivileged - no sudo required. It will drop a SQLite database file in there when it runs. Make the files executable:
 
 ```
-cd ~/agile-blinkt-indicator && chmod +x *.py
+cd ~/agile-blinkt-indicator && chmod +x *.py *.sh
 ```
 
 (https://en.wikipedia.org/wiki/Distribution_network_operator):  
@@ -79,8 +79,11 @@ If it's all a bit much, you can blank the display:
 
 # Running automatically
 I really can't be bothered to make a systemd timer/service for this. `cron` is so much easier!
-Run `crontab -e` and do something like this (don't forget to update your region code:)
-
+I've included a script to install the cron jobs listed below. Run it like this, replacing X with your region:
+```
+./install_crontab.sh X
+```
+You can check it's worked by running `crontab -l`, you should see this:
 ```
 @reboot /bin/sleep 30; cd /home/pi/agile-blinkt-indicator && /usr/bin/python3 store_prices.py --region X > ./blinkt.log 2>&1
 @reboot /bin/sleep 40; cd /home/pi/agile-blinkt-indicator && /usr/bin/python3 update_blinkt.py > ./blinkt.log 2>&1
@@ -94,7 +97,7 @@ Run `crontab -e` and do something like this (don't forget to update your region 
 - line 3: wait till 5 seconds past every half hour and update the display
 - lines 4, 5, and 6: update the price database at 4.30pm, 6.30pm, and 8.30pm to cover late arrival of data
 
-If it stops working, log in and run it manually and see what it moans about!
+If anything stops working, log in and run `store_prices.py` and `update_blinkt.py` and see what they moan about!
 
 # To Do:
 
