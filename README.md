@@ -73,12 +73,12 @@ I really can't be bothered to make a systemd timer/service for this. `cron` is s
 Run `crontab -e` and do something like this (don't forget to update your region code:)
 
 ```
-@reboot /bin/sleep 30; cd /home/pi/agile-blinkt-indicator && /usr/bin/python3 store_prices.py --region X > /home/pi/blinkt.log 2>&1
-@reboot /bin/sleep 40; cd /home/pi/agile-blinkt-indicator && /usr/bin/python3 update_blinkt.py > /home/pi/blinkt.log 2>&1
-*/30 * * * * /bin/sleep 5; cd /home/pi/agile-blinkt-indicator && /usr/bin/python3 update_blinkt.py > /home/pi/blinkt.log 2>&1
-30 16 * * * cd /home/pi/agile-blinkt-indicator && /usr/bin/python3 store_prices.py > /home/pi/blinkt.log 2>&1
-30 18 * * * cd /home/pi/agile-blinkt-indicator && /usr/bin/python3 store_prices.py > /home/pi/blinkt.log 2>&1
-30 20 * * * cd /home/pi/agile-blinkt-indicator && /usr/bin/python3 store_prices.py > /home/pi/blinkt.log 2>&1
+@reboot /bin/sleep 30; cd /home/pi/agile-blinkt-indicator && /usr/bin/python3 store_prices.py --region B > ./blinkt.log 2>&1
+@reboot /bin/sleep 40; cd /home/pi/agile-blinkt-indicator && /usr/bin/python3 update_blinkt.py > ./blinkt.log 2>&1
+*/30 * * * * /bin/sleep 5; cd /home/pi/agile-blinkt-indicator && /usr/bin/python3 update_blinkt.py > ./blinkt.log 2>&1
+30 16 * * * cd /home/pi/agile-blinkt-indicator && /usr/bin/python3 store_prices.py > ./blinkt.log 2>&1
+30 18 * * * cd /home/pi/agile-blinkt-indicator && /usr/bin/python3 store_prices.py > ./blinkt.log 2>&1
+30 20 * * * cd /home/pi/agile-blinkt-indicator && /usr/bin/python3 store_prices.py > ./blinkt.log 2>&1
 ```
 - line 1: wait 30 seconds at startup, get new prices
 - line 2: wait a further 10 seconds at startup and update the display
