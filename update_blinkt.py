@@ -40,11 +40,11 @@ def price_to_colour(price):
     if price <= 0:
         return 'blue'
     raise SystemExit("Can't continue - price of " + str(price) +" doesn't make sense.")
-    
+
 parser = argparse.ArgumentParser(description=('Update Blinkt! display using SQLite data'))
 parser.add_argument('--demo', '-d', action='store_true',
                     help= 'display configured colours, one per pixel',)
-                    
+
 args = parser.parse_args()
 
 if args.demo: 
