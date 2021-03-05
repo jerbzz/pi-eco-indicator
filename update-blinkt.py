@@ -27,7 +27,7 @@ def price_to_colour(price):
     elif 13.5 >= price > 10: return 'yellow'
     elif 10 >= price > 5: return 'green'
     elif 5 >= price > 0: return 'cyan'
-    elif price < 0: return 'blue'
+    elif price <= 0: return 'blue'
     else: raise SystemExit("Can't continue - price of " + str(price) +" doesn't make sense.")
 
 try:
