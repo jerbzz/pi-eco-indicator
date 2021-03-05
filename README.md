@@ -30,11 +30,7 @@ cd ~ && git clone https://github.com/jerbzz/agile-blinkt-indicator.git
 
 # How to use this code
 
-This code runs unprivileged - no sudo required. It will drop a SQLite database file in there when it runs. Make the files executable:
-
-```
-cd ~/agile-blinkt-indicator && chmod +x *.py *.sh
-```
+This code runs unprivileged - no sudo required. It will drop a SQLite database file in there when it runs.
 
 (https://en.wikipedia.org/wiki/Distribution_network_operator):  
 A = East England  
