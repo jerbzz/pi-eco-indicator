@@ -3,6 +3,10 @@ Display upcoming Octopus Agile prices on the Pimoroni Blinkt! display for Raspbe
 
 ![Display in action](https://raw.githubusercontent.com/jerbzz/agile-blinkt-indicator/main/images/DSC_5094.jpg)
 
+Read it from left to right. Each pixel represents a half hour slot. The leftmost pixel represents the current price. On the half hour, every half hour, everything shifts one pixel to the left.
+
+Magenta is the most expensive, then red if it's under 28p, orange if it's under 17p, yellow if it's under 13.5p, green if it's under 10p, cyan if it's under 5p, and blue if it's a plunge. You can change these quite easily by editing the code.
+
 # Hardware needed
 
 - Pimoroni Blinkt!, https://shop.pimoroni.com/products/blinkt
