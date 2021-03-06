@@ -1,5 +1,5 @@
 # agile-blinkt-indicator
-Display upcoming Octopus Agile prices on the Pimoroni Blinkt! display for Raspberry Pi.
+Display upcoming Octopus Agile prices on the Pimoroni Blinkt! display for Raspberry Pi, with no external dependencies - prices are fetched directly from Octopus's public API and stored locally. Designed to be simple to set up and use for people with no coding knowledge.
 
 ![Display in action](https://raw.githubusercontent.com/jerbzz/agile-blinkt-indicator/main/images/DSC_5094.jpg)
 
