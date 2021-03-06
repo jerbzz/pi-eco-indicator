@@ -104,10 +104,29 @@ while RETRY_COUNT <= MAX_RETRIES:
         print('API request successful, status ' + str(response.status_code) + '.')
         break
 
-NUM_PRICES = 0
-NUM_ERRORS = 0
+def insert_record(data: tuple) -> bool:
+    """Assuming we still have a cursor, take a tuple and stick it into the database.
+       Return False if it was a duplicate record (not inserted) and True if a record
+       was successfully inserted."""
+    if not cursor:
+        raise SystemExit('Database connection lost!')
+    try:
+        cursor.execute(
+            "INSERT INTO 'prices'('valid_from', 'value_inc_vat') VALUES (?, ?);", data)
+    except sqlite3.Error as error:
+        if str.find(str(error), 'UNIQUE') == -1:
+        # ignore expected UNIQUE constraint errors when trying to duplicate prices
+        # this will only raise SystemExit if it's **not** a 'UNIQUE' error
+            raise SystemExit('Database error: ' + str(error)) from error
+        return False # it was a duplicate record and wasn't inserted
+    else:
+        return True # the record was inserted
+
+NUM_PRICES_INSERTED = 0
+NUM_DUPLICATES = 0
 
 for result in pricedata['results']:
+
     # make the date/time work for SQLite, it's picky about the format,
     # easier to use the built in SQLite datetime functions
     # when figuring out what records we want rather than trying to roll our own
@@ -116,25 +135,20 @@ for result in pricedata['results']:
 
     data_tuple = (valid_from_formatted, result['value_inc_vat'])
 
-    # now store in the database safely
-    try:
-        cursor.execute(
-            "INSERT INTO 'prices'('valid_from', 'value_inc_vat') VALUES (?, ?);", data_tuple)
-    except sqlite3.Error as error:
-        if str.find(str(error), 'UNIQUE') == -1:
-        # ignore expected UNIQUE constraint errors when trying to duplicate prices
-            raise SystemExit('Database error: ' + str(error)) from error
-        else:
-            NUM_ERRORS += 1
+    # insert_record returns False if it was a duplicate record
+    # or True if a record was successfully entered.
+    if insert_record(data_tuple):
+        NUM_PRICES_INSERTED += 1
     else:
-        NUM_PRICES += 1
+        NUM_DUPLICATES += 1
 
-print('Ignoring ' + str(NUM_ERRORS) + ' duplicate prices...')
+if NUM_DUPLICATES > 0:
+    print('Ignoring ' + str(NUM_DUPLICATES) + ' duplicate prices...')
 
-if NUM_PRICES > 0:
+if NUM_PRICES_INSERTED > 0:
     lastslot = datetime.strftime(datetime.strptime(
         pricedata['results'][0]['valid_to'],"%Y-%m-%dT%H:%M:%SZ"),"%H:%M on %A %d %b")
-    print(str(NUM_PRICES) + ' prices were inserted, ending at ' + lastslot + '.')
+    print(str(NUM_PRICES_INSERTED) + ' prices were inserted, ending at ' + lastslot + '.')
 else:
     print('No prices were inserted - maybe we have them'
            ' already or Octopus are late with their update.')
@@ -159,4 +173,3 @@ except sqlite3.Error as error:
 if conn:
     conn.commit()
     conn.close()
-
