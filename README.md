@@ -111,10 +111,7 @@ Look for this part:
 colourmap = { 'magenta': { 'r': 155, 'g': 0, 'b': 200 },
               'red': { 'r': 255, 'g': 0, 'b': 0 },
               'orange': { 'r': 255, 'g': 30, 'b': 0 },
-              'yellow': { 'r': 180, 'g': 100, 'b': 0 },
-              'green': { 'r': 0, 'g': 255, 'b': 0 },
-              'cyan': { 'r': 0, 'g': 160, 'b': 180 },
-              'blue': { 'r': 0, 'g': 0, 'b': 255 }, }
+...
 ```
 **Don't change the names of the colours**. Change the numbers and nothing else. Anything between 0 and 255 is fine, anything else may produce "interesting" results. 0 means none of that colour, 255 means all of it (modified by the `BRIGHTNESS` setting further up the file). Remember you can test the colours by running `./update_blinkt.py --demo`
 
@@ -122,19 +119,14 @@ colourmap = { 'magenta': { 'r': 155, 'g': 0, 'b': 200 },
 Look for this part:
 ```
     if price > 28:
-        return 'magenta'
-    if 28 >= price > 17:
-        return 'red'
-    if 17 >= price > 13.5:
-        return 'orange'
-    if 13.5 >= price > 10:
-        return 'yellow'
-    if 10 >= price > 5:
-        return 'green'
-    if 5 >= price > 0:
-        return 'cyan'
-    if price <= 0:
-        return 'blue'
+        pixel_colour = 'magenta'
+
+    elif 28 >= price > 17:
+        pixel_colour = 'red'
+
+    elif 17 >= price > 13.5:
+        pixel_colour = 'orange'
+...
 ```
 **Don't change the names of the colours**. Change the numbers and nothing else. The main thing to be sure of here is you don't have any gaps or overlaps in the price bands - you'll end up with undefined behaviour at that point.
 
