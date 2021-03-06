@@ -26,20 +26,30 @@ def price_to_colour(price):
     prices are including VAT in p/kWh"""
 
     if price > 28:
-        return 'magenta'
-    if 28 >= price > 17:
-        return 'red'
-    if 17 >= price > 13.5:
-        return 'orange'
-    if 13.5 >= price > 10:
-        return 'yellow'
-    if 10 >= price > 5:
-        return 'green'
-    if 5 >= price > 0:
-        return 'cyan'
-    if price <= 0:
-        return 'blue'
-    raise SystemExit("Can't continue - price of " + str(price) +" doesn't make sense.")
+        pixel_colour = 'magenta'
+
+    elif 28 >= price > 17:
+        pixel_colour = 'red'
+
+    elif 17 >= price > 13.5:
+        pixel_colour = 'orange'
+
+    elif 13.5 >= price > 10:
+        pixel_colour = 'yellow'
+
+    elif 10 >= price > 5:
+        pixel_colour = 'green'
+
+    elif 5 >= price > 0:
+        pixel_colour = 'cyan'
+
+    elif price <= 0:
+        pixel_colour = 'blue'
+
+    else:
+        raise SystemExit("Can't continue - price of " + str(price) +" doesn't make sense.")
+
+    return pixel_colour
 
 parser = argparse.ArgumentParser(description=('Update Blinkt! display using SQLite data'))
 parser.add_argument('--demo', '-d', action='store_true',
@@ -47,7 +57,7 @@ parser.add_argument('--demo', '-d', action='store_true',
 
 args = parser.parse_args()
 
-if args.demo: 
+if args.demo:
     blinkt.clear()
     i = 0
     for colour in colourmap:
@@ -57,7 +67,7 @@ if args.demo:
     print ("Demo mode...")
     blinkt.set_clear_on_exit(False)
     blinkt.show()
-    
+
 else:
     try:
         # connect to the database in rw mode so we can catch the error if it doesn't exist
