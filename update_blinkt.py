@@ -12,7 +12,7 @@ import blinkt
 BRIGHTNESS = 10
 
 # define colour values for LEDs. Edit as you please...
-colourmap = { 'magenta': { 'r': 155, 'g': 0, 'b': 200 },
+COLOUR_MAP = { 'magenta': { 'r': 155, 'g': 0, 'b': 200 },
               'red': { 'r': 255, 'g': 0, 'b': 0 },
               'orange': { 'r': 255, 'g': 30, 'b': 0 },
               'yellow': { 'r': 180, 'g': 100, 'b': 0 },
@@ -20,7 +20,7 @@ colourmap = { 'magenta': { 'r': 155, 'g': 0, 'b': 200 },
               'cyan': { 'r': 0, 'g': 160, 'b': 180 },
               'blue': { 'r': 0, 'g': 0, 'b': 255 }, }
 
-def price_to_colour(price):
+def price_to_colour(price: float) -> str:
     """edit this function to change price thresholds - be careful that you
     don't leave gaps in the numbers or strange things will very likely happen.
     prices are including VAT in p/kWh"""
@@ -51,6 +51,16 @@ def price_to_colour(price):
 
     return pixel_colour
 
+def set_pixel(index: int, this_colour: str):
+    """This function looks up the R, G, and B values for a given colour
+    in the 'COLOUR_MAP' dictionary and passes them to the blinkt! set_pixel method."""
+
+    pixel_value_red = COLOUR_MAP[this_colour]['r']
+    pixel_value_green = COLOUR_MAP[this_colour]['g']
+    pixel_value_blue = COLOUR_MAP[this_colour]['b']
+    blinkt.set_pixel(index, pixel_value_red,
+                     pixel_value_green, pixel_value_blue, BRIGHTNESS/100)
+
 parser = argparse.ArgumentParser(description=('Update Blinkt! display using SQLite data'))
 parser.add_argument('--demo', '-d', action='store_true',
                     help= 'display configured colours, one per pixel',)
@@ -60,9 +70,8 @@ args = parser.parse_args()
 if args.demo:
     blinkt.clear()
     i = 0
-    for colour in colourmap:
-        blinkt.set_pixel(i, colourmap[colour]['r'],
-            colourmap[colour]['g'], colourmap[colour]['b'], BRIGHTNESS/100)
+    for colour in COLOUR_MAP:
+        set_pixel(i, colour)
         i += 1
     print ("Demo mode...")
     blinkt.set_clear_on_exit(False)
@@ -80,27 +89,24 @@ else:
         raise SystemExit('Database not found - you need to run store_prices.py first.') from error
 
     cursor.execute("SELECT * FROM prices WHERE valid_from > datetime('now', '-30 minutes') LIMIT 8")
-    rows = cursor.fetchall()
+    price_data_rows = cursor.fetchall()
 
     # finish up the database operation
     if conn:
         conn.commit()
         conn.close()
 
-    if not len(rows) >= 8:
+    if not len(price_data_rows) >= 8:
         print('Not enough data to fill the display - we will get dark pixels.')
 
     blinkt.clear()
 
     i = 0
-
-    for row in rows:
-        print(str(i) + ": " + str(row[1]) + "p - " + str(price_to_colour(row[1])))
-        PIXEL_VALUE_RED = colourmap[price_to_colour(row[1])]['r']
-        PIXEL_VALUE_GREEN = colourmap[price_to_colour(row[1])]['g']
-        PIXEL_VALUE_BLUE = colourmap[price_to_colour(row[1])]['b']
-        blinkt.set_pixel(i, PIXEL_VALUE_RED,
-            PIXEL_VALUE_GREEN, PIXEL_VALUE_BLUE, BRIGHTNESS/100)
+    for row in price_data_rows:
+        slot_price = row[1]
+        this_pixel_colour = price_to_colour(slot_price) # pylint: disable=I0011,C0103
+        print(str(i) + ": " + str(slot_price) + "p = " + this_pixel_colour)
+        set_pixel(i, this_pixel_colour)
         i += 1
 
     print ("Setting display...")
