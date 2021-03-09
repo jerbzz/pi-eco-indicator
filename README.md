@@ -25,7 +25,7 @@ curl https://get.pimoroni.com/blinkt | bash
 Once you have installed the Blinkt! software as above, the easiest way to download this software is to copy and paste the following command, which will make a copy of all the files in a folder called **agile-blinkt-indicator** in your home directory. This won't work unless you've installed the Blinkt! library above (or installed `git` yourself).
 
 ```
-cd ~ && git -c advice.detachedHead=false clone --depth 1 -b v1.1.3 https://github.com/jerbzz/agile-blinkt-indicator.git
+cd ~ && git -c advice.detachedHead=false clone --depth 1 -b v1.1.4 https://github.com/jerbzz/agile-blinkt-indicator.git
 ```
 
 # How to use this code
