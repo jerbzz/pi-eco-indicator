@@ -1,6 +1,8 @@
 # agile-blinkt-indicator
 Display upcoming Octopus Agile prices on the Pimoroni Blinkt! display for Raspberry Pi, with no external dependencies - prices are fetched directly from Octopus's public API and stored locally. Designed to be simple to set up and use for people with no coding knowledge.
 
+Should you wish to purchase a preconfigured device, I have an [Etsy shop here](https://www.etsy.com/uk/listing/968401316/octopus-energy-agile-tariff-price).
+
 ![Display in action](https://raw.githubusercontent.com/jerbzz/agile-blinkt-indicator/main/images/DSC_5094.jpg)
 
 Read it from left to right. Each pixel represents a half hour slot, so you get 3.5 to 4 hours of data depending on when you look at it! The leftmost pixel represents the current price. On the half hour, every half hour, everything shifts one pixel to the left.
@@ -30,7 +32,7 @@ cd ~ && git -c advice.detachedHead=false clone --depth 1 -b v1.1.4 https://githu
 
 # How to use this code
 
-This code runs unprivileged - no sudo required. It will drop a SQLite database file in there when it runs.
+This code runs unprivileged - no sudo required. It will drop a SQLite database file in its own directory when it runs.
 
 (https://en.wikipedia.org/wiki/Distribution_network_operator):  
 A = East England  
@@ -132,10 +134,10 @@ Look for this part:
 
 # To Do:
 
+- read brightness, colours and price thresholds from config file
 - better retry if data is late, 3 cron jobs is hacky
 - colours could depend on daily average rather than fixed values
-- configuration options?
-- logging of issues
+
 
 # Thanks to:
 
