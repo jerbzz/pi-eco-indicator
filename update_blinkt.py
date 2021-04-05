@@ -42,7 +42,7 @@ def update_blinkt():
         i = 0
         for price in prices:
             this_pixel_colour = cfg.price_to_colour(price) # pylint: disable=I0011,C0103
-            print(str(i) + ": " + str(price) + "p = " + this_pixel_colour)
+            print(str(i) + ": " + str(price) + "p = " + cfg.COLOUR_MAP[this_pixel_colour]['name'] + " (" + this_pixel_colour + ")")
             set_pixel(i, this_pixel_colour)
             i += 1
 
