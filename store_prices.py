@@ -5,14 +5,14 @@ for a particular region, and insert these into an SQLite database, dealing with 
 requests and pruning old data so that the DB doesn't grow infinitely."""
 
 import sqlite3
-import argparse
 import time
-from argparse import RawTextHelpFormatter
 from reprlib import Repr
 from datetime import datetime
 from urllib.request import pathname2url
 import requests
+import yaml
 
+DNO_REGIONS = ['A','B','C','D','E','F','G','P','N','J','H','K','L','M']
 
 # hopefully these won't ever change
 AGILE_TARIFF_BASE = (
@@ -151,35 +151,28 @@ def remove_old_prices(age: str):
     except sqlite3.Error as error:
         print('Failed while trying to remove old prices from database: ', error)
 
+try:
+    config_file = open('config.yaml', 'r')
+except FileNotFoundError:
+    print('Unable to find config.yaml')
 
-# let's get the region from the command line and make sure it's allowed!
-parser = argparse.ArgumentParser(description=('Retrieve Octopus Agile prices'
-                                              'and store in a SQLite database'),
-                                 formatter_class=RawTextHelpFormatter)
-parser.add_argument('--region', '-r', nargs=1, type=str, metavar='X', action='store', required=True,
-                    help= """
-https://en.wikipedia.org/wiki/Distribution_network_operator
-A = East England
-B = East Midlands
-C = London
-D = North Wales, Merseyside and Cheshire
-E = West Midlands
-F = North East England
-G = North West England
-P = North Scotland
-N = South and Central Scotland
-J = South East England
-H = Southern England
-K = South Wales
-L = South West England
-M = Yorkshire""",
-                    choices = ['A','B','C','D','E','F','G','P','N','J','H','K','L','M'])
-args = parser.parse_args()
-print('Selected region ' + args.region[0])
-agile_tariff_region = args.region[0]
+try:
+    config = yaml.safe_load(config_file)
+except yaml.YAMLError as err:
+    raise SystemExit('Error reading configuration: ' + str(err))
+
+if not 'DNORegion' in config:
+    raise SystemExit('Error: DNORegion not found in config.yaml')
+
+DNO_REGION = config['DNORegion']
+
+if DNO_REGION in DNO_REGIONS: 
+    print('Selected region ' + DNO_REGION)
+else:
+    raise SystemExit('Error: DNO region ' + DNO_REGION + ' is not a valid choice.')
 
 # Build the API for the request - public API so no authentication required
-AGILE_TARIFF_URI = (AGILE_TARIFF_BASE + agile_tariff_region + AGILE_TARIFF_TAIL)
+AGILE_TARIFF_URI = (AGILE_TARIFF_BASE + DNO_REGION + AGILE_TARIFF_TAIL)
 
 data_rows = get_prices_from_api(AGILE_TARIFF_URI)
 
