@@ -1,0 +1,76 @@
+---
+
+DNORegion:  B
+# Permitted regions are:
+# A = East England
+# B = East Midlands
+# C = London
+# D = North Wales, Merseyside and Cheshire
+# E = West Midlands
+# F = North East England
+# G = North West England
+# P = North Scotland
+# N = South and Central Scotland
+# J = South East England
+# H = Southern England
+# K = South Wales
+# L = South West England
+# M = Yorkshire
+
+DisplayType: blinkt
+# supported display types are "blinkt" or "inkyphat"
+
+InkyPHAT:
+
+    HighPrice: 15.0
+    LowPriceDelta: 1.0
+
+
+Blinkt:
+
+    Brightness: 10
+    # min 5, max 100
+
+    Magenta: 
+    Price: 28.0
+    R: 155
+    G: 0
+    B: 200
+    
+    Red:
+    Price: 17.0
+    R: 255
+    G: 0
+    B: 0
+
+    Orange:
+    Price: 13.5
+    R: 255
+    G: 30
+    B: 0
+
+    Yellow:
+    Price: 10.0
+    R: 180
+    G: 100
+    B: 0
+
+    Green:
+    Price: 5.0
+    R: 0
+    G: 255
+    B: 0
+
+    Cyan:
+    Price: 0.0
+    R: 0
+    G: 160
+    B: 180
+
+    Blue:
+    Price: -100.0
+    R: 0
+    G: 0
+    B: 255
+
+
