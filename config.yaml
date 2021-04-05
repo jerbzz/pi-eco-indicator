@@ -1,6 +1,6 @@
 ---
 
-DNORegion:  B
+DNORegion: B
 # Permitted regions are:
 # A = East England
 # B = East Midlands
@@ -72,5 +72,3 @@ Blinkt:
     R: 0
     G: 0
     B: 255
-
-
