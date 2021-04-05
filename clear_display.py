@@ -6,8 +6,15 @@ from inky.eeprom import read_eeprom
 from inky.auto import auto
 from PIL import Image
 
-with open(r'config.yaml') as file:
-    config = yaml.full_load(file)
+try:
+    config_file = open('config.yaml', 'r')
+except FileNotFoundError:
+    raise SystemExit('Unable to find config.yaml')
+
+try:
+    config = yaml.safe_load(config_file)
+except yaml.YAMLError as err:
+    raise SystemExit('Error reading configuration: ' + str(err))
 
 if not 'DisplayType' in config:
     raise SystemExit('Error: DisplayType not found in config.yaml')
