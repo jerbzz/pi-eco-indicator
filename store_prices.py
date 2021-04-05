@@ -98,7 +98,7 @@ def insert_data (data: dict):
         print(str(num_prices_inserted) + ' prices were inserted, ending at ' + lastslot + '.')
     else:
         print('No prices were inserted - maybe we have them'
-               ' already or octopus are late with their update.')
+               ' already or Octopus are late with their update.')
 
 
 def insert_record(valid_from: str, value_inc_vat: float) -> bool:
