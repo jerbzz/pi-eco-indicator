@@ -154,7 +154,7 @@ def remove_old_prices(age: str):
 try:
     config_file = open('config.yaml', 'r')
 except FileNotFoundError:
-    print('Unable to find config.yaml')
+    raise SystemExit('Unable to find config.yaml')
 
 try:
     config = yaml.safe_load(config_file)
