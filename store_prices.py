@@ -81,10 +81,30 @@ def insert_data (data: dict):
     num_duplicates = 0
 
     for result in data['results']:
+        # do messy pufferfish data mangling to prevent rewriting the inky display code
+
+        mom_price = result['value_inc_vat']
+        raw_from = result['valid_from']
+
+        # work out the buckets
+        # We need to reformat the date to a python date from a json date
+        date = datetime.strptime(raw_from, "%Y-%m-%dT%H:%M:%SZ")
+        mom_year = (date.year)
+        mom_month = (date.month)
+        mom_day = (date.day)
+        mom_hour = (date.hour)
+
+        # We actually don't care about exact minutes, we just mark with a 0 if it's an hour time
+        # or a 1 if it's half past the hour.
+        if date.minute == 00:
+            mom_offset = 0
+        else:
+            mom_offset = 1 #half hour
 
         # insert_record returns false if it was a duplicate record
         # or true if a record was successfully entered.
-        if insert_record(result['valid_from'], result['value_inc_vat']):
+        if insert_record(mom_year, mom_month, mom_day, mom_hour,
+                         mom_offset, mom_price, result['valid_from']):
             num_prices_inserted += 1
         else:
             num_duplicates += 1
@@ -98,10 +118,11 @@ def insert_data (data: dict):
         print(str(num_prices_inserted) + ' prices were inserted, ending at ' + lastslot + '.')
     else:
         print('No prices were inserted - maybe we have them'
-               ' already or octopus are late with their update.')
+               ' already or Octopus are late with their update.')
 
 
-def insert_record(valid_from: str, value_inc_vat: float) -> bool:
+def insert_record(year: int, month: int, day: int, hour: int, segment: int, # pylint: disable=too-many-arguments
+                  price: float, valid_from: str) -> bool:
     """Assuming we still have a cursor, take a tuple and stick it into the database.
        Return False if it was a duplicate record (not inserted) and True if a record
        was successfully inserted."""
@@ -114,11 +135,12 @@ def insert_record(valid_from: str, value_inc_vat: float) -> bool:
     valid_from_formatted = datetime.strftime(
         datetime.strptime(valid_from, "%Y-%m-%dT%H:%M:%SZ"), "%Y-%m-%d %H:%M:%S")
 
-    data_tuple = (valid_from_formatted, value_inc_vat)
+    data_tuple = (year, month, day, hour, segment, price, valid_from_formatted)
 
     try:
-        cursor.execute(
-            "INSERT INTO 'prices'('valid_from', 'value_inc_vat') VALUES (?, ?);", data_tuple)
+        cursor.execute("INSERT INTO 'prices' "
+                       "('year', 'month', 'day', 'hour', 'segment', 'price', 'valid_from')"
+                       "VALUES (?, ?, ?, ?, ?, ?, ?);", data_tuple)
 
     except sqlite3.Error as error:
         # ignore expected UNIQUE constraint errors when trying to duplicate prices
@@ -197,8 +219,8 @@ except sqlite3.OperationalError:
     cursor = conn.cursor()
     # UNIQUE constraint prevents duplication of data on multiple runs of this script
     # ON CONFLICT FAIL allows us to count how many times this happens
-    cursor.execute('CREATE TABLE prices (valid_from STRING UNIQUE ON CONFLICT FAIL, '
-                    'value_inc_vat REAL)')
+    cursor.execute("CREATE TABLE prices (year INTEGER, month INTEGER, day INTEGER, hour INTEGER, "
+                   "segment INTEGER, price REAL, valid_from STRING UNIQUE ON CONFLICT FAIL)")
     conn.commit()
     print('Database created... ')
 
