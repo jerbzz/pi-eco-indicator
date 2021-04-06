@@ -16,7 +16,7 @@ DNORegion: B
 # L = South West England
 # M = Yorkshire
 
-DisplayType: inkyphat
+DisplayType: blinkt
 # supported display types are "blinkt" or "inkyphat"
 
 InkyPHAT:
@@ -29,44 +29,46 @@ Blinkt:
     Brightness: 10
     # min 5, max 100
 
-    Level6: # magenta 
-    Price: 28.0
-    R: 155
-    G: 0
-    B: 200
+    Colours:
     
-    Level5: # red
-    Price: 17.0
-    R: 255
-    G: 0
-    B: 0
+        Level6: # magenta 
+            Price: 28.0
+            R: 155
+            G: 0
+            B: 200
+    
+        Level5: # red
+            Price: 17.0
+            R: 255
+            G: 0
+            B: 0
 
-    Level4: # orange
-    Price: 13.5
-    R: 255
-    G: 30
-    B: 0
+        Level4: # orange
+            Price: 13.5
+            R: 255
+            G: 30
+            B: 0
 
-    Level3: # yellow
-    Price: 10.0
-    R: 180
-    G: 100
-    B: 0
+        Level3: # yellow
+            Price: 10.0
+            R: 180
+            G: 100
+            B: 0
 
-    Level2: # green
-    Price: 5.0
-    R: 0
-    G: 255
-    B: 0
+        Level2: # green
+            Price: 5.0
+            R: 0
+            G: 255
+            B: 0
 
-    Level1: # cyan
-    Price: 0.0
-    R: 0
-    G: 160
-    B: 180
+        Level1: # cyan
+            Price: 0.0
+            R: 0
+            G: 160
+            B: 180
 
-    Level0: # blue
-    Price: -100.0
-    R: 0
-    G: 0
-    B: 255
+        Level0: # blue
+            Price: -100.0
+            R: 0
+            G: 0
+            B: 255
