@@ -8,6 +8,7 @@ from urllib.request import pathname2url
 import argparse
 import blinkt
 import yaml
+from inky.eeprom import read_eeprom
 
 DEFAULT_BRIGHTNESS = 10
 
@@ -154,7 +155,11 @@ else:
         print('Not enough data to fill the display - we will get dark pixels.')
 
     config = get_config()
-
+    
+    for colour, data in config['Blinkt']['Colours'].items():
+        print(colour)
+        for key in data:
+            print(key + ':', data[key])
     blinkt.clear()
 
     i = 0
