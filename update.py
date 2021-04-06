@@ -4,8 +4,8 @@
    Pimoroni Blinkt! or Inky pHAT display if connected."""
 
 from inky.eeprom import read_eeprom
-from update_blinkt import update_blinkt
-from update_inky import update_inky
+from blinkt_updater import update_blinkt
+from inky_updater import update_inky
 
 find_inky = read_eeprom()
 
