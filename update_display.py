@@ -9,6 +9,8 @@ import argparse
 import blinkt
 import yaml
 
+DEFAULT_BRIGHTNESS = 10
+
 def deep_get(d, keys, default=None):
     """
     Example:
@@ -47,8 +49,8 @@ def get_config() -> dict:
         conf_brightness = deep_get(config, ['Blinkt', 'Brightness'])
         if not (type(conf_brightness) == int and 5 <= conf_brightness <= 100):
             print('Misconfigured brightness value: ' + str(conf_brightness) +
-                  '. Using default of 10.')
-            config['Blinkt']['Brightness'] = 10
+                  '. Using default of ' + str(DEFAULT_BRIGHTNESS) + '.')
+            config['Blinkt']['Brightness'] = DEFAULT_BRIGHTNESS
 
     elif config['DisplayType'] == 'inkyphat':
         inky_eeprom = read_eeprom()
@@ -73,9 +75,9 @@ COLOUR_MAP = { 'magenta': { 'r': 155, 'g': 0, 'b': 200 },
               'blue': { 'r': 0, 'g': 0, 'b': 255 }, }
 
 def price_to_colour(price: float) -> str:
-    """edit this function to change price thresholds - be careful that you
+    """Edit this function to change price thresholds - be careful that you
     don't leave gaps in the numbers or strange things will very likely happen.
-    prices are including vat in p/kwh"""
+    prices are including VAT in p/kWh"""
 
     if price > 28:
         pixel_colour = 'magenta'
@@ -99,7 +101,7 @@ def price_to_colour(price: float) -> str:
         pixel_colour = 'blue'
 
     else:
-        raise systemexit("can't continue - price of " + str(price) +" doesn't make sense.")
+        raise SystemExit("Can't continue - price of " + str(price) +" doesn't make sense.")
 
     return pixel_colour
 
