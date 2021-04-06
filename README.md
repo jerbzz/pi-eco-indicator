@@ -95,12 +95,12 @@ I've included a script to install the cron jobs listed below. Run it like this, 
 ```
 You can check it's worked by running `crontab -l`, you should see this:
 ```sh
-@reboot /bin/sleep 30; cd /home/pi/agile-pi-ndicator && /usr/bin/python3 store_prices.py --region X > ./pi-ndicator.log 2>&1
-@reboot /bin/sleep 40; cd /home/pi/agile-pi-ndicator && /usr/bin/python3 update_blinkt.py > ./pi-ndicator.log 2>&1
-*/30 * * * * /bin/sleep 5; cd /home/pi/agile-pi-ndicator && /usr/bin/python3 update.py > ./pi-ndicator.log 2>&1
-30 16 * * * cd /home/pi/agile-pi-ndicator && /usr/bin/python3 store_prices.py --region X > ./pi-ndicator.log 2>&1
-30 18 * * * cd /home/pi/agile-pi-ndicator && /usr/bin/python3 store_prices.py --region X > ./pi-ndicator.log 2>&1
-30 20 * * * cd /home/pi/agile-pi-ndicator && /usr/bin/python3 store_prices.py --region X > ./pi-ndicator.log 2>&1
+@reboot /bin/sleep 30; cd /home/pi/agile-pi-ndicator && /usr/bin/python3 store_prices.py --region X > ./logs/agile.log 2>&1
+@reboot /bin/sleep 40; cd /home/pi/agile-pi-ndicator && /usr/bin/python3 update_blinkt.py > ./logs/agile.log 2>&1
+*/30 * * * * /bin/sleep 5; cd /home/pi/agile-pi-ndicator && /usr/bin/python3 update.py > ./logs/agile.log 2>&1
+30 16 * * * cd /home/pi/agile-pi-ndicator && /usr/bin/python3 store_prices.py --region X > ./logs/agile.log 2>&1
+30 18 * * * cd /home/pi/agile-pi-ndicator && /usr/bin/python3 store_prices.py --region X > ./logs/agile.log 2>&1
+30 20 * * * cd /home/pi/agile-pi-ndicator && /usr/bin/python3 store_prices.py --region X > ./logs/agile.log 2>&1
 ```
 - line 1: wait 30 seconds at startup, get new prices
 - line 2: wait a further 10 seconds at startup and update the display
@@ -111,7 +111,7 @@ You can check it's worked by running `crontab -l`, you should see this:
 
 If something isn't working, run 
 ```sh
-less ~/agile-pi-ndicator/pi-ndicator.log
+less ~/agile-pi-ndicator/logs/agile.log
 ```
 This will show you the most recent message from any of the scripts (that were run automatically by `cron`). If this doesn't shed any light, run `./store_prices.py` and `./update.py` and see what they moan about!
 
@@ -148,8 +148,7 @@ Look for this part:
 
 - better retry if data is late, 3 cron jobs is hacky
 - colour thresholds could depend on daily average rather than fixed values
-- separate log storage and rotation
-
+- log rotation
 
 ## Thanks to:
 

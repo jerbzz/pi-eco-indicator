@@ -28,7 +28,7 @@ def update_blinkt():
     if args.demo:
         blinkt.clear()
         i = 0
-        for colour in COLOUR_MAP:
+        for colour in cfg.COLOUR_MAP:
             set_pixel(i, colour)
             i += 1
         print ("Blinkt! in demo mode. Run again without --demo to update with SQLite data.")

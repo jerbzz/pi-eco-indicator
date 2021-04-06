@@ -35,7 +35,7 @@ def get_prices(count: int) -> list:
       else:
         the_segment = 1
 
-      print(slot.strftime("%d/%m/%Y"), "hour:", the_hour, "segment:", the_segment)
+      print("Slot", i, "at", slot.strftime("%d/%m/%Y"), "hour:", the_hour, "segment:", the_segment)
 
       # select from db where record == the above
       cur.execute("SELECT * FROM prices WHERE year=? AND month=? AND day=? AND hour=? AND segment=?",
