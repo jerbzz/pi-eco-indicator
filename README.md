@@ -9,7 +9,7 @@ Should you wish to purchase a preconfigured device, I have an [Etsy shop here](h
 
 Read it from left to right. Each pixel represents a half hour slot, so you get 3.5 to 4 hours of data depending on when you look at it! The leftmost pixel represents the current price. On the half hour, every half hour, everything shifts one pixel to the left.
 
-Magenta is the most expensive, then red if it's under 28p, orange if it's under 17p, yellow if it's under 13.5p, green if it's under 10p, cyan if it's under 5p, and blue if it's a plunge. You can change these quite easily by editing the code.
+Magenta is the most expensive, then red if it's under 28p, orange if it's under 17p, yellow if it's under 13.5p, green if it's under 10p, cyan if it's under 5p, and blue if it's a plunge. You can change these quite easily by editing a config file.
 
 ## Working with Inky pHat
 
@@ -127,7 +127,7 @@ COLOUR_MAP = { 'level6': { 'r': 155, 'g': 0, 'b': 200, 'name': 'magenta' },
               'level4': { 'r': 255, 'g': 30, 'b': 0, 'name': 'orange' },
 ...
 ```
-**Don't change the names of the levels**. You can change the numbers and the comment after the # sign at the end of the line but nothing else. Any number between 0 and 255 is fine, anything else may produce "interesting" results. 0 means none of that colour, 255 means all of it (modified by the `BRIGHTNESS` setting further up the file). You can test the colours after saving your changes by running `./update.py --demo` and always find the original values on the github site.
+**Don't change the names of the levels**. You can change the numbers and the named colours (which are only there to be human-readable in logs) but please don't change anything else. Any number between 0 and 255 is fine, anything else may produce "interesting" results. 0 means none of that colour, 255 means all of it (modified by the `BRIGHTNESS` setting further up the file). You can test the colours after saving your changes by running `./update.py --demo` and always find the original values on the github site.
 
 ### Price thresholds
 Look for this part:
