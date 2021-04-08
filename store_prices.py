@@ -153,20 +153,20 @@ def remove_old_prices(age: str):
 
 try:
     config_file = open('config.yaml', 'r')
-except FileNotFoundError:
-    raise SystemExit('Unable to find config.yaml')
+except FileNotFoundError as no_config:
+    raise SystemExit('Unable to find config.yaml') from no_config
 
 try:
     config = yaml.safe_load(config_file)
-except yaml.YAMLError as err:
-    raise SystemExit('Error reading configuration: ' + str(err))
+except yaml.YAMLError as config_err:
+    raise SystemExit('Error reading configuration: ' + str(config_err)) from config_err
 
 if not 'DNORegion' in config:
     raise SystemExit('Error: DNORegion not found in config.yaml')
 
 DNO_REGION = config['DNORegion']
 
-if DNO_REGION in DNO_REGIONS: 
+if DNO_REGION in DNO_REGIONS:
     print('Selected region ' + DNO_REGION)
 else:
     raise SystemExit('Error: DNO region ' + DNO_REGION + ' is not a valid choice.')
