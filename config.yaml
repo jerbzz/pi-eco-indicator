@@ -31,43 +31,50 @@ Blinkt:
 
     Colours:
     
-        Level6: # magenta 
+        Level6:
+            Name: Magenta
             Price: 28.0
             R: 155
             G: 0
             B: 200
     
-        Level5: # red
+        Level5:
+            Name: Red
             Price: 17.0
             R: 255
             G: 0
             B: 0
 
-        Level4: # orange
+        Level4:
+            Name: Orange
             Price: 13.5
             R: 255
             G: 30
             B: 0
 
-        Level3: # yellow
+        Level3:
+            Name: Yellow
             Price: 10.0
             R: 180
             G: 100
             B: 0
 
-        Level2: # green
+        Level2:
+            Name: Green
             Price: 5.0
             R: 0
             G: 255
             B: 0
 
-        Level1: # cyan
+        Level1:
+            Name: Cyan
             Price: 0.0
             R: 0
             G: 160
             B: 180
 
-        Level0: # blue
+        Level0:
+            Name: Blue
             Price: -100.0
             R: 0
             G: 0
