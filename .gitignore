@@ -1,3 +1,4 @@
 images
 agileprices.sqlite
 *.log
+.*
