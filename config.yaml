@@ -16,13 +16,13 @@ DNORegion: B
 # L = South West England
 # M = Yorkshire
 
-DisplayType: blinkt
+DisplayType: inkyphat
 # supported display types are "blinkt" or "inkyphat"
 
 InkyPHAT:
 
-    HighPrice: 15.0
-    LowPriceDelta: 1.0
+    HighPrice: 10.0
+    LowSlotDelta: 1.0
 
 Blinkt:
 

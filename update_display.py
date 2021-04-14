@@ -6,11 +6,14 @@
 import sqlite3
 from urllib.request import pathname2url
 import argparse
-import blinkt
 import yaml
-from inky.eeprom import read_eeprom
 
+# Blinkt! defaults
 DEFAULT_BRIGHTNESS = 10
+
+# Inky pHAT defaults
+DEFAULT_HIGHPRICE = 15.0
+DEFAULT_LOWSLOTDELTA = 1.5
 
 def deep_get(this_dict: dict, keys: str, default=None):
     """
@@ -38,34 +41,46 @@ def get_config() -> dict:
         raise SystemExit('Unable to find config.yaml') from no_config
 
     try:
-        config = yaml.safe_load(config_file)
+        _config = yaml.safe_load(config_file)
     except yaml.YAMLError as config_err:
         raise SystemExit('Error reading configuration: ' + str(config_err)) from config_err
 
-    if config['DisplayType'] is None:
+    if _config['DisplayType'] is None:
         raise SystemExit('Error: DisplayType not found in config.yaml')
 
-    if config['DisplayType'] == 'blinkt':
+    if _config['DisplayType'] == 'blinkt':
         print ('Blinkt! display selected.')
-        conf_brightness = deep_get(config, ['Blinkt', 'Brightness'])
+        conf_brightness = deep_get(_config, ['Blinkt', 'Brightness'])
         if not (isinstance(conf_brightness, int) and 5 <= conf_brightness <= 100):
             print('Misconfigured brightness value: ' + str(conf_brightness) +
                   '. Using default of ' + str(DEFAULT_BRIGHTNESS) + '.')
-            config['Blinkt']['Brightness'] = DEFAULT_BRIGHTNESS
-        if len(config['Blinkt']['Colours'].items()) < 2:
+            _config['Blinkt']['Brightness'] = DEFAULT_BRIGHTNESS
+        if len(_config['Blinkt']['Colours'].items()) < 2:
             raise SystemExit('Error: Less than two colour levels found in config.yaml')
 
-    elif config['DisplayType'] == 'inkyphat':
+    elif _config['DisplayType'] == 'inkyphat':
+        print ('Inky pHAT display selected.')
+        
+        from inky.eeprom import read_eeprom
         inky_eeprom = read_eeprom()
-
         if inky_eeprom is None:
             raise SystemExit('Error: Inky pHAT display not found')
-        print ('Inky pHAT display selected.')
+            
+        conf_highprice = deep_get(_config, ['InkyPHAT', 'HighPrice'])
+        if not (isinstance(conf_highprice, (int, float)) and 0 <= conf_highprice <= 35):
+            print('Misconfigured high price value: ' + str(conf_highprice) +
+                  '. Using default of ' + str(DEFAULT_HIGHPRICE) + '.')
+            _config['InkyPHAT']['HighPrice'] = DEFAULT_HIGHPRICE
 
+        conf_lowslotdelta = deep_get(_config, ['InkyPHAT', 'LowSlotDelta'])
+        if not (isinstance(conf_lowslotdelta, (int, float)) and 0 <= conf_lowslotdelta <= 35):
+            print('Misconfigured high price value: ' + str(conf_lowslotdelta) +
+                  '. Using default of ' + str(DEFAULT_LOWSLOTDELTA) + '.')
+            _config['InkyPHAT']['LowSlotDelta'] = DEFAULT_LOWSLOTDELTA
     else:
         raise SystemExit('Error: unknown DisplayType ' + config['DisplayType'] + ' in config.yaml' )
 
-    return config
+    return _config
 
 parser = argparse.ArgumentParser(description=('Update Blinkt! display using SQLite data'))
 parser.add_argument('--demo', '-d', action='store_true',
@@ -73,57 +88,35 @@ parser.add_argument('--demo', '-d', action='store_true',
 
 args = parser.parse_args()
 
-if args.demo:
-    print ("Demo mode. Showing up to first 8 configured colours...")
-    conf = get_config()
-    print(str(len(conf['Blinkt']['Colours'].items())) + ' colour levels found in config.yaml')
-    blinkt.clear()
-    i = 0
-    for level, data in conf['Blinkt']['Colours'].items():
-        print(data)
-        blinkt.set_pixel(i, data['R'], data['G'], data['B'], conf['Blinkt']['Brightness']/100)
-        i += 1
 
-    blinkt.set_clear_on_exit(False)
-    blinkt.show()
+try:
+    # connect to the database in rw mode so we can catch the error if it doesn't exist
+    DB_URI = 'file:{}?mode=rw'.format(pathname2url('agileprices.sqlite'))
+    conn = sqlite3.connect(DB_URI, uri=True)
+    cursor = conn.cursor()
+    print('Connected to database...')
 
-else:
-    try:
-        # connect to the database in rw mode so we can catch the error if it doesn't exist
-        DB_URI = 'file:{}?mode=rw'.format(pathname2url('agileprices.sqlite'))
-        conn = sqlite3.connect(DB_URI, uri=True)
-        cursor = conn.cursor()
-        print('Connected to database...')
+except sqlite3.OperationalError as error:
+    # handle missing database case
+    raise SystemExit('Database not found - you need to run store_prices.py first.') from error
 
-    except sqlite3.OperationalError as error:
-        # handle missing database case
-        raise SystemExit('Database not found - you need to run store_prices.py first.') from error
+cursor.execute("SELECT * FROM prices WHERE valid_from > datetime('now', '-30 minutes') LIMIT 8")
+price_data_rows = cursor.fetchall()
 
-    cursor.execute("SELECT * FROM prices WHERE valid_from > datetime('now', '-30 minutes') LIMIT 8")
-    price_data_rows = cursor.fetchall()
+# finish up the database operation
+if conn:
+    conn.commit()
+    conn.close()
 
-    # finish up the database operation
-    if conn:
-        conn.commit()
-        conn.close()
+if len(price_data_rows) < 8:
+    print('Not enough data to fill the display - we will get dark pixels.')
 
-    if len(price_data_rows) < 8:
-        print('Not enough data to fill the display - we will get dark pixels.')
+config = get_config()
 
-    conf = get_config()
-    blinkt.clear()
-    i = 0
+if config['DisplayType'] == 'blinkt':
+    import blinkt_display
+    blinkt_display.update_blinkt(config, price_data_rows, args.demo)
 
-    for row in price_data_rows:
-        slot_price = row[1]
-        for level, data in conf['Blinkt']['Colours'].items():
-            if slot_price >= data['Price']:
-                print(str(i) + ': ' + str(slot_price) + 'p -> ' + data['Name'])
-                blinkt.set_pixel(i, data['R'], data['G'], data['B'],
-                                 conf['Blinkt']['Brightness']/100)
-                break
-        i += 1
-
-    print ("Setting display...")
-    blinkt.set_clear_on_exit(False)
-    blinkt.show()
+if config['DisplayType'] == 'inkyphat':
+    import inkyphat_display
+    inkyphat_display.update_inky(config, price_data_rows, args.demo)
