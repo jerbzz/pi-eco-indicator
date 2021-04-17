@@ -100,16 +100,13 @@ except sqlite3.OperationalError as error:
     # handle missing database case
     raise SystemExit('Database not found - you need to run store_prices.py first.') from error
 
-cursor.execute("SELECT * FROM prices WHERE valid_from > datetime('now', '-30 minutes') LIMIT 8")
+cursor.execute("SELECT * FROM prices WHERE valid_from > datetime('now', '-30 minutes')")
 price_data_rows = cursor.fetchall()
 
 # finish up the database operation
 if conn:
     conn.commit()
     conn.close()
-
-if len(price_data_rows) < 8:
-    print('Not enough data to fill the display - we will get dark pixels.')
 
 config = get_config()
 

@@ -24,6 +24,9 @@ def update_blinkt(conf: dict, prices: dict, demo: bool):
     else:
         blinkt.clear()
         i = 0
+                
+        if len(prices) < 8:
+            print('Not enough data to fill the display - we will get dark pixels.')
 
         for row in prices:
             slot_price = row[1]
@@ -34,6 +37,7 @@ def update_blinkt(conf: dict, prices: dict, demo: bool):
                                      conf['Blinkt']['Brightness']/100)
                     break
             i += 1
+            if i == 7: break
 
         print ("Setting display...")
         blinkt.set_clear_on_exit(False)
