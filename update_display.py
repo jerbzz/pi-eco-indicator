@@ -60,12 +60,11 @@ def get_config() -> dict:
 
     elif _config['DisplayType'] == 'inkyphat':
         print ('Inky pHAT display selected.')
-        
-        from inky.eeprom import read_eeprom
+        from inky.eeprom import read_eeprom # pylint: disable=C0415
         inky_eeprom = read_eeprom()
         if inky_eeprom is None:
             raise SystemExit('Error: Inky pHAT display not found')
-            
+
         conf_highprice = deep_get(_config, ['InkyPHAT', 'HighPrice'])
         if not (isinstance(conf_highprice, (int, float)) and 0 <= conf_highprice <= 35):
             print('Misconfigured high price value: ' + str(conf_highprice) +
