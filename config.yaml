@@ -17,22 +17,31 @@ DNORegion: B
 # M = Yorkshire
 
 DisplayType: inkyphat
-# supported display types are "blinkt" or "inkyphat"
+# supported display types are "blinkt" or "inkyphat".
 
 InkyPHAT:
 
-    HighPrice: 10.0
-    LowSlotDelta: 1.0
+    HighPrice: 13.5
+    # at or above this price, text and graph bars turn red/yellow.
+    LowSlotDuration: 2.5
+    # how long (in hours) the "lowest slot" function should search for.
+    # This must be between 0.5 and 6 hours in half hour increments.
 
 Blinkt:
 
+    Mode: agile_price
+    # supported modes are "agile_price" or "hildebrand_mqtt_power"
+
     Brightness: 10
-    # min 5, max 100
+    # min 5, max 100. 100 is *really really bright*.
 
     Colours:
+    # Power is for hildebrand_mqtt_power mode, price is for agile_price mode
+    # Power is in W, Price is in p/kWh
     
         Level6:
             Name: Magenta
+            Power: 3000
             Price: 28.0
             R: 155
             G: 0
@@ -40,6 +49,7 @@ Blinkt:
     
         Level5:
             Name: Red
+            Power: 1000
             Price: 17.0
             R: 255
             G: 0
@@ -47,6 +57,7 @@ Blinkt:
 
         Level4:
             Name: Orange
+            Power: 600
             Price: 13.5
             R: 255
             G: 30
@@ -54,6 +65,7 @@ Blinkt:
 
         Level3:
             Name: Yellow
+            Power: 400
             Price: 10.0
             R: 180
             G: 100
@@ -61,6 +73,7 @@ Blinkt:
 
         Level2:
             Name: Green
+            Power: 250
             Price: 5.0
             R: 0
             G: 255
@@ -68,6 +81,7 @@ Blinkt:
 
         Level1:
             Name: Cyan
+            Power: 100
             Price: 0.0
             R: 0
             G: 160
@@ -75,6 +89,7 @@ Blinkt:
 
         Level0:
             Name: Blue
+            Power: 0
             Price: -100.0
             R: 0
             G: 0

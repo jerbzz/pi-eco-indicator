@@ -13,7 +13,7 @@ DEFAULT_BRIGHTNESS = 10
 
 # Inky pHAT defaults
 DEFAULT_HIGHPRICE = 15.0
-DEFAULT_LOWSLOTDELTA = 1.5
+DEFAULT_LOWSLOTDURATION = 3
 
 def deep_get(this_dict: dict, keys: str, default=None):
     """
@@ -71,11 +71,12 @@ def get_config() -> dict:
                   '. Using default of ' + str(DEFAULT_HIGHPRICE) + '.')
             _config['InkyPHAT']['HighPrice'] = DEFAULT_HIGHPRICE
 
-        conf_lowslotdelta = deep_get(_config, ['InkyPHAT', 'LowSlotDelta'])
-        if not (isinstance(conf_lowslotdelta, (int, float)) and 0 <= conf_lowslotdelta <= 35):
-            print('Misconfigured high price value: ' + str(conf_lowslotdelta) +
-                  '. Using default of ' + str(DEFAULT_LOWSLOTDELTA) + '.')
-            _config['InkyPHAT']['LowSlotDelta'] = DEFAULT_LOWSLOTDELTA
+        conf_lowslotduration = deep_get(_config, ['InkyPHAT', 'LowSlotDuration'])
+        if not (conf_lowslotduration % 0.5 == 0 and 0.5 <= conf_lowslotduration <= 6):
+            print('Low slot duration misconfigured: ' + str(conf_lowslotduration) +
+                  ' (must be between 0.5 and 6 hours in half hour increments).' + 
+                  ' Using default of ' + str(DEFAULT_LOWSLOTDURATION) + '.')
+            _config['InkyPHAT']['LowSlotDuration'] = DEFAULT_LOWSLOTDURATION
     else:
         raise SystemExit('Error: unknown DisplayType ' + config['DisplayType'] + ' in config.yaml' )
 
