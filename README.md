@@ -67,7 +67,7 @@ Then, a separate command to update the display:
 This will also tell you what it's doing. If you want to show a display of dummy data you can run:
 
 ```
-./update_dispplay.py --demo
+./update_display.py --demo
 ```
 
 If it's all a bit much, you can blank the display:
