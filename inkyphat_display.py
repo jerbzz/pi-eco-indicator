@@ -14,6 +14,7 @@ from tzlocal import get_localzone
 from inky.auto import auto
 from PIL import Image, ImageFont, ImageDraw
 from font_roboto import RobotoMedium, RobotoBlack
+from math import ceil
 
 def update_inky(conf: dict, prices: dict, demo: bool):
 # pylint: disable=C0116
@@ -33,8 +34,8 @@ def update_inky(conf: dict, prices: dict, demo: bool):
         graph_y_unit = 2.3
         graph_x_unit = 4 # needs to be int to avoid aliasing
         font_scale_factor = 1.2
-        x_padding_factor = 1.2
-        y_padding_factor = 1.2
+        x_padding_factor = 1.25
+        y_padding_factor = 1.25
 
     # original Inky pHAT
     if inky_display.resolution == (212, 104):
@@ -64,8 +65,13 @@ def update_inky(conf: dict, prices: dict, demo: bool):
                               is_dst=None).astimezone(local_tz), "%H:%M"))
         print("Cheapest " + str(low_slot_duration) + " hours: average " + 
               low_slots_average + "p/kWh at " + low_slots_start_time + ".")
-        
+
         min_slot = min(prices, key = lambda prices: prices[1])
+        min_slot_price = str(min_slot[1])
+        min_slot_time = str(datetime.strftime(pytz.utc.localize(datetime.strptime(min_slot[0], "%Y-%m-%d %H:%M:%S"), 
+                              is_dst=None).astimezone(local_tz), "%H:%M"))
+
+        print("Lowest priced slot: " + min_slot_price + "p at " + min_slot_time + ".")
 
         # figure out the cheapest slot
 
@@ -80,9 +86,9 @@ def update_inky(conf: dict, prices: dict, demo: bool):
         for price in prices:
             # draw the lowest slots in black and the highest in red/yellow
 
-            if (i + 1) * graph_x_unit > 128 * x_padding_factor:
+            if (i + 1) * graph_x_unit > 127 * x_padding_factor:
                 break # don't scribble on the small text
-                
+
             if low_slots_start_idx <= i < low_slots_start_idx + num_low_slots:
                 colour = inky_display.BLACK
             elif price[1] > conf['InkyPHAT']['HighPrice']:
@@ -105,27 +111,36 @@ def update_inky(conf: dict, prices: dict, demo: bool):
         x = 0 * x_padding_factor
         y = 8 * y_padding_factor
 
+        slot_start = str(datetime.strftime(pytz.utc.localize(datetime.strptime(prices[0][0],
+                         "%Y-%m-%d %H:%M:%S"), is_dst=None).astimezone(local_tz), "%H:%M"))
+
         if prices[0][1] > conf['InkyPHAT']['HighPrice']:
             draw.text((x, y), message, inky_display.RED, font)
             inky_display.set_border(inky_display.RED)
+            print("Current price from " + slot_start + ": " + message + " (High)")
         else:
             draw.text((x, y), message, inky_display.BLACK, font)
             inky_display.set_border(inky_display.WHITE)
+            print("Current price from " + slot_start + ": " + message)
 
         # draw time info above current price...
         font = ImageFont.truetype(RobotoMedium, size = int(15 * font_scale_factor))
-        slot_start = str(datetime.strftime(pytz.utc.localize(datetime.strptime(prices[0][0],
-            "%Y-%m-%d %H:%M:%S"), is_dst=None).astimezone(local_tz), "%H:%M"))
-        message = "Price at " + slot_start + "    " # trailing spaces prevent text clipping
+        message = "Price from " + slot_start + "    " # trailing spaces prevent text clipping
         x = 4 * x_padding_factor
         y = 0 * y_padding_factor
         draw.text((x, y), message, inky_display.BLACK, font)
+
+        mins_until_next_slot = ceil((pytz.utc.localize(datetime.strptime(
+                                prices[1][0], "%Y-%m-%d %H:%M:%S"), is_dst=None) - datetime.now(
+                                pytz.timezone("UTC"))).total_seconds() / 60)
+
+        print(str(mins_until_next_slot) + " mins until next slot.")
 
         # draw next 3 slot times...
         font = ImageFont.truetype(RobotoMedium, size = int(15 * font_scale_factor))
         x = 130 * x_padding_factor
         for i in range(3):
-            message = "+" + str(30 * (i + 1)) + ":    " # trailing spaces prevent text clipping
+            message = "+" + str(mins_until_next_slot + (i * 30)) + ":    " # trailing spaces prevent text clipping
             y = i * 18 * y_padding_factor + 3 * y_padding_factor
             draw.text((x, y), message, inky_display.BLACK, font)
 
@@ -149,14 +164,14 @@ def update_inky(conf: dict, prices: dict, demo: bool):
         x = 130 * x_padding_factor
         y = 10 * y_padding_factor + (3 * 18 * y_padding_factor)
         font = ImageFont.truetype(RobotoMedium, size = int(13 * font_scale_factor))
-        
+
         if '.' in str(low_slot_duration): 
             lsd_text = str(low_slot_duration).rstrip('0').rstrip('.')
         else:
             lsd_text = str(low_slot_duration)
-        
+
         draw.text((x, y), lsd_text + "h @" + low_slots_average + "p    ", inky_display.BLACK, font)
-        
+
         y = 16 * (y_padding_factor * 0.6) + (4 * 18 * y_padding_factor)
 
         min_slot_timedelta = datetime.strptime(prices[low_slots_start_idx][0], 
@@ -172,7 +187,7 @@ def update_inky(conf: dict, prices: dict, demo: bool):
             bar_y_height = price[1] * graph_y_unit
             prev_bar_y_height = prices[i-1][1] * graph_y_unit
 
-            if (i + 1) * graph_x_unit > 128 * x_padding_factor: # don't scribble on the small text
+            if (i + 1) * graph_x_unit > 127 * x_padding_factor: # don't scribble on the small text
                 break
 
             # horizontal lines...
