@@ -21,9 +21,9 @@ DisplayType: inkyphat
 
 InkyPHAT:
 
-    HighPrice: 13.5
+    HighPrice: 15
     # at or above this price, text and graph bars turn red/yellow.
-    LowSlotDuration: 2.5
+    LowSlotDuration: 3
     # how long (in hours) the "lowest slot" function should search for.
     # This must be between 0.5 and 6 hours in half hour increments.
 
