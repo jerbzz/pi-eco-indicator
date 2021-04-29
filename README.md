@@ -35,7 +35,7 @@ curl https://get.pimoroni.com/inky | bash
 Once you have installed the Pimoroni software as above, the easiest way to download this software is to copy and paste the following command, which will make a copy of all the files in a folder called **agile-blinkt-indicator** in your home directory. This won't work unless you've installed the Blinkt! library above (or installed `git` yourself).
 
 ```
-cd ~ && git -c advice.detachedHead=false clone --depth 1 -b v2.0.0 https://github.com/jerbzz/octopus-agile-indicator.git
+cd ~ && git -c advice.detachedHead=false clone --depth 1 -b support-other-displays https://github.com/jerbzz/octopus-agile-indicator.git
 ```
 
 # How to use this code
@@ -67,7 +67,7 @@ Then, a separate command to update the display:
 This will also tell you what it's doing. If you want to show a display of dummy data you can run:
 
 ```
-./update_dispplay.py --demo
+./update_display.py --demo
 ```
 
 If it's all a bit much, you can blank the display:
