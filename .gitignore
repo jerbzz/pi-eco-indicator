@@ -1,4 +1,5 @@
 images
-agileprices.sqlite
+*.sqlite
 *.log
 .*
+config.yaml

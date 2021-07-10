@@ -1,0 +1,101 @@
+---
+DNORegion: B
+# Permitted regions are:
+# A = East England
+# B = East Midlands
+# C = London
+# D = North Wales, Merseyside and Cheshire
+# E = West Midlands
+# F = North East England
+# G = North West England
+# P = North Scotland
+# N = South and Central Scotland
+# J = South East England
+# H = Southern England
+# K = South Wales
+# L = South West England
+# M = Yorkshire
+# Z = National (only valid in carbon mode)
+
+
+Mode: carbon
+# supported modes are "agile_price" or "carbon"
+
+DisplayType: blinkt
+# supported display types are "blinkt" or "inkyphat".
+
+InkyPHAT:
+
+    HighPrice: 15
+    # at or above this price, text and graph bars turn red/yellow.
+    HighIntensity: 300
+    # at or above this carbon intensity, text and graph bars turn red/yellow.
+    LowSlotDuration: 3
+    # how long (in hours) the "lowest slot" function should search for.
+    # This must be between 0.5 and 6 hours in half hour increments.
+
+Blinkt:
+
+    Brightness: 10
+    # min 5, max 100. 100 is *really really bright*.
+
+    Colours:
+    # Price is only for agile_price mode
+    # Carbon is only for carbon mode
+    # Price is in p/kWh, Carbon is in g/kWh
+    
+        Level6:
+            Name: Magenta
+            Price: 28.0
+            Carbon: 350
+            R: 155
+            G: 0
+            B: 200
+    
+        Level5:
+            Name: Red
+            Price: 17.0
+            Carbon: 300
+            R: 255
+            G: 0
+            B: 0
+
+        Level4:
+            Name: Orange
+            Price: 13.5
+            Carbon: 240
+            R: 255
+            G: 30
+            B: 0
+
+        Level3:
+            Name: Yellow
+            Price: 10.0
+            Carbon: 180
+            R: 180
+            G: 100
+            B: 0
+
+        Level2:
+            Name: Green
+            Price: 5.0
+            Carbon: 120
+            R: 0
+            G: 255
+            B: 0
+
+        Level1:
+            Name: Cyan
+            Price: 0.0
+            Carbon: 60
+            R: 0
+            G: 160
+            B: 180
+
+        Level0:
+            Name: Blue
+            Price: -100.0
+            Carbon: 25
+            R: 0
+            G: 0
+            B: 255
