@@ -37,6 +37,12 @@ Once you have installed the Pimoroni software as above, the easiest way to downl
 ```
 cd ~ && git -c advice.detachedHead=false clone --depth 1 -b support-other-displays https://github.com/jerbzz/octopus-agile-indicator.git
 ```
+You will also need to install some other dependencies:
+```
+sudo apt install python3-yaml
+sudo apt install python3-tzlocal
+pip3 install font-roboto
+```
 
 # How to use this code
 
