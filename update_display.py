@@ -43,8 +43,6 @@ if conn:
 
 config = eco_indicator.get_config()
 
-print(data_rows)
-
 if config['DisplayType'] == 'blinkt':
     eco_indicator.update_blinkt(config, data_rows, args.demo)
 

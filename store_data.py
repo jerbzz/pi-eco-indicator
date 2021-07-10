@@ -7,8 +7,9 @@ requests and pruning old data so that the DB doesn't grow infinitely."""
 import sqlite3
 import time
 from reprlib import Repr
-from datetime import datetime
+from datetime import datetime, timedelta
 from urllib.request import pathname2url
+import pytz
 import requests
 import yaml
 import eco_indicator
@@ -128,7 +129,7 @@ def insert_data (data: dict):
                 num_duplicates += 1
         if num_rows_inserted > 0:
             lastslot = datetime.strftime(datetime.strptime(
-                carbon_data[47]['to'],"%Y-%m-%dT%H:%MZ"),"%H:%M on %A %d %b")
+                carbon_data[47]['from'],"%Y-%m-%dT%H:%MZ"),"%H:%M on %A %d %b")
             print(str(num_rows_inserted) + ' intensities were inserted, ending at ' + lastslot + '.')
         else:
             print('No values were inserted - maybe we have them'
@@ -152,6 +153,7 @@ def insert_record(valid_from: str, data_value: float) -> bool:
             datetime.strptime(valid_from, "%Y-%m-%dT%H:%M:%SZ"), "%Y-%m-%d %H:%M:%S")
 
         data_tuple = (valid_from_formatted, data_value)
+        print(data_tuple) # debug
 
         try:
             cursor.execute(
@@ -169,6 +171,7 @@ def insert_record(valid_from: str, data_value: float) -> bool:
         datetime.strptime(valid_from, "%Y-%m-%dT%H:%MZ"), "%Y-%m-%d %H:%M:%S")
 
         data_tuple = (valid_from_formatted, data_value)
+        print(data_tuple) # debug
 
         try:
             cursor.execute(
@@ -222,9 +225,9 @@ elif config['Mode'] == 'carbon':
         raise SystemExit('Error: DNO region ' + DNO_REGION + ' is not a valid choice.')
 
     # Build the API for the request - public API so no authentication required
-    iso_time_now = datetime.now().isoformat()
+    request_time = datetime.now().astimezone(pytz.utc).isoformat()
     request_uri = (CARBON_API_BASE + CARBON_REGIONS[DNO_REGION])
-    request_uri = request_uri.format(from_time = iso_time_now)
+    request_uri = request_uri.format(from_time = request_time)
 
 try:
     # connect to the database in rw mode so we can catch the error if it doesn't exist
@@ -247,7 +250,6 @@ except sqlite3.OperationalError:
 
 data_rows = get_data_from_api(request_uri)
 
-print(data_rows)
 insert_data(data_rows)
 
 remove_old_data('2 days')
