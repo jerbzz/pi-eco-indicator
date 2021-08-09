@@ -1,3 +1,5 @@
+This file is out of date as of 10/08/21 - working on it!
+
 # octopus-agile-indicator
 Display upcoming Octopus Agile prices on the Pimoroni Blinkt! display or the Pimoroni Inky pHAT display for Raspberry Pi, with no external dependencies - prices are fetched directly from Octopus's public API and stored locally. Designed to be simple to set up and use for people with no coding knowledge. Other displays will be supported in the future.
 
