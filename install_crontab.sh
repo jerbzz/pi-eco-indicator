@@ -1,9 +1,9 @@
 #!/bin/bash
 
 CONFIG_FILE="config.yaml"
-INSTALL_DIR="/home/pi/octopus-agile-indicator"
+INSTALL_DIR="/home/pi/pi-eco-indicator"
 PYTHON_BIN="/usr/bin/python3"
-LOG_FILE="./eco_indicator.log"
+LOG_FILE="$INSTALL_DIR/eco_indicator.log"
 
 function parse_yaml {
     local prefix=$2
