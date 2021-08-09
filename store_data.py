@@ -153,7 +153,7 @@ def insert_record(valid_from: str, data_value: float) -> bool:
             datetime.strptime(valid_from, "%Y-%m-%dT%H:%M:%SZ"), "%Y-%m-%d %H:%M:%S")
 
         data_tuple = (valid_from_formatted, data_value)
-        print(data_tuple) # debug
+        # print(data_tuple) # debug
 
         try:
             cursor.execute(
@@ -171,7 +171,7 @@ def insert_record(valid_from: str, data_value: float) -> bool:
         datetime.strptime(valid_from, "%Y-%m-%dT%H:%MZ"), "%Y-%m-%d %H:%M:%S")
 
         data_tuple = (valid_from_formatted, data_value)
-        print(data_tuple) # debug
+        # print(data_tuple) # debug
 
         try:
             cursor.execute(
