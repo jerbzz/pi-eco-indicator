@@ -6,6 +6,7 @@ requests and pruning old data so that the DB doesn't grow infinitely."""
 
 import sqlite3
 import os
+import sys
 import time
 from reprlib import Repr
 from datetime import datetime, timedelta

@@ -5,6 +5,7 @@
 
 import sqlite3
 import os
+import sys
 from urllib.request import pathname2url
 import argparse
 import yaml
