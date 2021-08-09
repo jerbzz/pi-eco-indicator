@@ -4,6 +4,7 @@
    Pimoroni Blinkt! display."""
 
 import sqlite3
+import os
 from urllib.request import pathname2url
 import argparse
 import yaml
@@ -21,6 +22,8 @@ parser.add_argument('--demo', '-d', action='store_true',
                     help= 'display demo data',)
 
 args = parser.parse_args()
+
+os.chdir(os.path.dirname(sys.argv[0]))
 
 try:
     # connect to the database in rw mode so we can catch the error if it doesn't exist

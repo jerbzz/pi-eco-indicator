@@ -5,6 +5,7 @@ for a particular region, and insert these into an SQLite database, dealing with 
 requests and pruning old data so that the DB doesn't grow infinitely."""
 
 import sqlite3
+import os
 import time
 from reprlib import Repr
 from datetime import datetime, timedelta
@@ -228,6 +229,8 @@ elif config['Mode'] == 'carbon':
     request_time = datetime.now().astimezone(pytz.utc).isoformat()
     request_uri = (CARBON_API_BASE + CARBON_REGIONS[DNO_REGION])
     request_uri = request_uri.format(from_time = request_time)
+
+os.chdir(os.path.dirname(sys.argv[0]))
 
 try:
     # connect to the database in rw mode so we can catch the error if it doesn't exist
