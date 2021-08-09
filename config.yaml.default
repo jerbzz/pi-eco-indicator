@@ -28,7 +28,7 @@ InkyPHAT:
 
     HighPrice: 15
     # at or above this price, text and graph bars turn red/yellow.
-    HighIntensity: 300
+    HighIntensity: 200
     # at or above this carbon intensity, text and graph bars turn red/yellow.
     LowSlotDuration: 3
     # how long (in hours) the "lowest slot" function should search for.
