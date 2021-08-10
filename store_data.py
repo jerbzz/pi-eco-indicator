@@ -122,7 +122,7 @@ def insert_data (data: dict):
             carbon_data = data['data']
         else:
             carbon_data = data['data']['data']
-            
+
         for result in carbon_data:
 
             if insert_record(result['from'], result['intensity']['forecast']):
@@ -185,7 +185,7 @@ def insert_record(valid_from: str, data_value: float) -> bool:
 
         else:
             return True # the record was inserted
-            
+
 def remove_old_data(age: str):
     """Delete old data from the database, we don't want to display those and we don't want it
     to grow too big. 'age' must be a string that SQLite understands"""
@@ -205,6 +205,7 @@ def remove_old_data(age: str):
     except sqlite3.Error as error:
         print('Failed while trying to remove old data points from database: ', error)
 
+os.chdir(os.path.dirname(sys.argv[0]))
 config = eco_indicator.get_config()
 
 if config['Mode'] == 'agile_price':
@@ -217,7 +218,7 @@ if config['Mode'] == 'agile_price':
 
     # Build the API for the request - public API so no authentication required
     request_uri = (AGILE_API_BASE + DNO_REGION + AGILE_API_TAIL)
-        
+
 elif config['Mode'] == 'carbon':
     DNO_REGION = config['DNORegion']
 
@@ -230,8 +231,6 @@ elif config['Mode'] == 'carbon':
     request_time = datetime.now().astimezone(pytz.utc).isoformat()
     request_uri = (CARBON_API_BASE + CARBON_REGIONS[DNO_REGION])
     request_uri = request_uri.format(from_time = request_time)
-
-os.chdir(os.path.dirname(sys.argv[0]))
 
 try:
     # connect to the database in rw mode so we can catch the error if it doesn't exist
