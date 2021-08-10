@@ -1,5 +1,3 @@
-This file is out of date as of 10/08/21 - working on it!
-
 # pi-eco-indicator
 Display upcoming Octopus Agile prices, or carbon intensity from [National Grid](https://carbonintensity.org.uk/) on the Pimoroni Blinkt! display or the Pimoroni Inky pHAT display for Raspberry Pi, with no external dependencies - data is fetched directly from public APIs and stored locally. Designed to be simple to set up and use for people with no coding knowledge. Other displays may be supported in the future.
 
