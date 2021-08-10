@@ -36,7 +36,7 @@ eval $(parse_yaml config.yaml "CONF_")
 
 if [ "$CONF_Mode" = "carbon" ]; then
     DELAY=$(( RANDOM % 60 ))
-	DELAYPLUS=$(( DELAY + 5 ))
+	DELAYPLUS=$(( DELAY + 10 ))
     echo "Installing pi-eco-indicator cron jobs for $CONF_Mode mode..."
 	(crontab -l 2>/dev/null; echo "@reboot /bin/sleep 30; $PYTHON_BIN $INSTALL_DIR/store_data.py > $LOG_FILE 2>&1") | crontab -
     (crontab -l 2>/dev/null; echo "@reboot /bin/sleep 40; $PYTHON_BIN $INSTALL_DIR/update_display.py > $LOG_FILE 2>&1") | crontab -
