@@ -1,15 +1,15 @@
 This file is out of date as of 10/08/21 - working on it!
 
-# octopus-agile-indicator
-Display upcoming Octopus Agile prices on the Pimoroni Blinkt! display or the Pimoroni Inky pHAT display for Raspberry Pi, with no external dependencies - prices are fetched directly from Octopus's public API and stored locally. Designed to be simple to set up and use for people with no coding knowledge. Other displays will be supported in the future.
+# pi-eco-indicator
+Display upcoming Octopus Agile prices, or carbon intensity from [National Grid](https://carbonintensity.org.uk/) on the Pimoroni Blinkt! display or the Pimoroni Inky pHAT display for Raspberry Pi, with no external dependencies - data is fetched directly from public APIs and stored locally. Designed to be simple to set up and use for people with no coding knowledge. Other displays may be supported in the future.
 
 Should you wish to purchase a preconfigured device, I have an [Etsy shop here](https://www.etsy.com/uk/listing/968401316/octopus-energy-agile-tariff-price).
 
+Here's the Blinkt! display (in Agile mode for this example, but it reads the same both ways.). Read it from left to right. Each pixel represents a half hour slot, so you get 3.5 to 4 hours of data depending on when you look at it! The leftmost pixel represents the current value. On the half hour, every half hour, everything shifts one pixel to the left.
+
+Magenta is the most expensive or most carbon intensive, then red, orange, yellow, green, cyan, and blue. You can change the thresholds and colours easily by editing a configuration file (`config.yaml`).
+
 ![Display in action](https://raw.githubusercontent.com/jerbzz/agile-blinkt-indicator/main/images/DSC_5094.jpg)
-
-Read it from left to right. Each pixel represents a half hour slot, so you get 3.5 to 4 hours of data depending on when you look at it! The leftmost pixel represents the current price. On the half hour, every half hour, everything shifts one pixel to the left.
-
-Magenta is the most expensive, then red if it's under 28p, orange if it's under 17p, yellow if it's under 13.5p, green if it's under 10p, cyan if it's under 5p, and blue if it's a plunge. You can change these quite easily by editing the code.
 
 # Hardware needed
 
@@ -20,7 +20,7 @@ Magenta is the most expensive, then red if it's under 28p, orange if it's under 
 # Software needed
 
 - This has been tested on Raspberry Pi OS Buster only.
-- Establish network access and enable SSH on the device.
+- Establish network access and [enable SSH on the device](https://magpi.raspberrypi.org/articles/ssh-remote-control-raspberry-pi).
 - You will need the Pimoroni Blinkt! Python library, https://github.com/pimoroni/blinkt or the
 - Pimoroni Inky Python library: https://github.com/pimoroni/inky
 - Install the appropriate library like so, making sure you answer YES to the questions.
@@ -37,7 +37,7 @@ curl https://get.pimoroni.com/inky | bash
 Once you have installed the Pimoroni software as above, the easiest way to download this software is to copy and paste the following command, which will make a copy of all the files in a folder called **agile-blinkt-indicator** in your home directory. This won't work unless you've installed the Blinkt! library above (or installed `git` yourself).
 
 ```
-cd ~ && git -c advice.detachedHead=false clone --depth 1 -b support-other-displays https://github.com/jerbzz/octopus-agile-indicator.git
+cd ~ && git -c advice.detachedHead=false clone --depth 1 -b v2.0.0 https://github.com/jerbzz/pi-eco-indicator.git
 ```
 You will also need to install some other dependencies:
 ```
@@ -50,11 +50,15 @@ pip3 install font-roboto
 
 This code runs unprivileged - no sudo required. It will drop a SQLite database file in its own directory when it runs.
 
-The settings for the software are stored in `config.yaml`.
+The settings for the software are stored in `config.yaml`. This is provided as `config.yaml.default` so you will first need to make a copy:
+
+```
+cp config.yaml.default config.yaml
+```
 
 Open config.yaml:
 ```
-cd ~\octopus-agile-indicator
+cd ~\pi-eco-indicator
 nano config.yaml
 ```
 and look for `DNORegion: B` at the very top. Replace this with your correct DNO region code from the list. Exit `nano` by typing Ctrl-W then Ctrl-X.
@@ -90,41 +94,39 @@ I've included a script to install the cron jobs listed below. Run it like this:
 ```
 ./install_crontab.sh
 ```
-You can check it's worked by running `crontab -l`, you should see this:
+You can check it's worked by running `crontab -l`, you should see something like this (for carbon mode, Agile mode is a little different):
 ```
-@reboot /bin/sleep 30; cd /home/pi/octopus-agile-indicator && usr/bin/python3 store_prices.py > ./indicator.log 2>&1
-@reboot /bin/sleep 40; cd /home/pi/octopus-agile-indicator && /usr/bin/python3 update_display.py > ./indicator.log 2>&1
-*/30 * * * * /bin/sleep 5; cd /home/pi/octopus-agile-indicator && /usr/bin/python3 update_display.py > ./indicator.log 2>&1
-30 16 * * * cd /home/pi/octopus-agile-indicator && /usr/bin/python3 store_prices.py > ./indicator.log 2>&1
-30 18 * * * cd /home/pi/octopus-agile-indicator && /usr/bin/python3 store_prices.py > ./indicator.log 2>&1
-30 20 * * * cd /home/pi/octopus-agile-indicator && /usr/bin/python3 store_prices.py > ./indicator.log 2>&1
+@reboot /bin/sleep 30; /usr/bin/python3 /home/pi/pi-eco-indicator/store_data.py > /home/pi/pi-eco-indicator/eco_indicator.log 2>&1
+@reboot /bin/sleep 40; /usr/bin/python3 /home/pi/pi-eco-indicator/update_display.py > /home/pi/pi-eco-indicator/eco_indicator.log 2>&1
+*/30 * * * * /bin/sleep 26; /usr/bin/python3 /home/pi/pi-eco-indicator/store_data.py > /home/pi/pi-eco-indicator/eco_indicator.log 2>&1
+*/30 * * * * /bin/sleep 36; /usr/bin/python3 /home/pi/pi-eco-indicator/update_display.py > /home/pi/pi-eco-indicator/eco_indicator.log 2>&1
 ```
-- line 1: wait 30 seconds at startup, get new prices
+- line 1: wait 30 seconds at startup, get new data
 - line 2: wait a further 10 seconds at startup and update the display
-- line 3: wait till 5 seconds past every half hour and update the display
-- lines 4, 5, and 6: update the price database at 4.30pm, 6.30pm, and 8.30pm to cover late arrival of data
+- line 3: wait till a random number of seconds past every half hour and get latest carbon data
+- line 4: wait a further 10 seconds and update the display
 
 # Troubleshooting
 
 If something isn't working, run 
 ```
-less ~/octopus-agile-indicator/indicator.log
+less ~/pi-eco-indicator/eco_indicator.log
 ```
 This will show you the most recent message from any of the scripts (that were run automatically by `cron`). If this doesn't shed any light, run `./store_prices.py` and `./update_display.py` and see what they moan about!
 
 # Modification
 
-If you want to change price thresholds or fine-tune the colours, they are located in `config.yaml`. Open it using `nano update_blinkt.py` or your favourite editor. 
+If you want to change price/carbon intensity thresholds, change mode, or fine-tune the colours, they are located in `config.yaml`. Open it using `nano config.yaml` or your favourite editor. I recommend that if you change mode, you delete the SQLite database first:
 
-It's really important that you don't change the layout of the file otherwise you will encounter errors when tryingt o run the software. Each option has comments describing its effects - read, and change to your heart's content.
+```
+rm ~\pi-eco-indicator\eco_indicator.sqlite
+```
+
+It's really important that you don't change the layout of the file otherwise you will encounter errors when trying to run the software. Each option has comments describing its effects - read, and change to your heart's content.
 
 # To Do:
 
-- better retry if data is late, 3 cron jobs is hacky
-- more options to change display
-  - maybe Blinkt! colours could depend on the averages
-  - maybe Inky could show a minimum price for a duration rather than a single slot
-
+See [GitHub issues](https://github.com/jerbzz/pi-eco-indicator/issues)
 
 # Thanks to:
 
