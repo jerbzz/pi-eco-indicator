@@ -39,9 +39,9 @@ cd ~ && git -c advice.detachedHead=false clone --depth 1 -b v2.0.0 https://githu
 ```
 You will also need to install some other dependencies:
 ```
-sudo apt install python3-yaml
-sudo apt install python3-tzlocal
-pip3 install font-roboto
+sudo apt install -y python3-yaml
+sudo apt install -y python3-tzlocal
+pip3 install -y font-roboto
 ```
 
 # How to use this code
