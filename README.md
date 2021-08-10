@@ -30,20 +30,18 @@ or
 ```
 curl https://get.pimoroni.com/inky | bash
 ```
-
+You can do both if desired! You will also need to install some other dependencies:
+```
+sudo apt install -y python3-yaml
+sudo apt install -y python3-tzlocal
+pip3 install font-roboto
+```
 # How to get this code
 Once you have installed the Pimoroni software as above, the easiest way to download this software is to copy and paste the following command, which will make a copy of all the files in a folder called **agile-blinkt-indicator** in your home directory. This won't work unless you've installed the Blinkt! library above (or installed `git` yourself).
 
 ```
 cd ~ && git -c advice.detachedHead=false clone --depth 1 -b v2.0.0 https://github.com/jerbzz/pi-eco-indicator.git
 ```
-You will also need to install some other dependencies:
-```
-sudo apt install -y python3-yaml
-sudo apt install -y python3-tzlocal
-pip3 install -y font-roboto
-```
-
 # How to use this code
 
 This code runs unprivileged - no sudo required. It will drop a SQLite database file in its own directory when it runs.
@@ -59,7 +57,7 @@ Open config.yaml:
 cd ~\pi-eco-indicator
 nano config.yaml
 ```
-and look for `DNORegion: B` at the very top. Replace this with your correct DNO region code from the list. Exit `nano` by typing Ctrl-W then Ctrl-X.
+and look for `DNORegion: Z` at the very top. Replace this with your correct DNO region code from the list, or leave it as Z if you are looking for national carbon intensity values. *(Note: I'm not a big fan of the regional carbon intensity data, I don't think it makes much sense, so I would encourage using national carbon data.)* Exit `nano` by typing Ctrl-W then Ctrl-X.
 
 You should initially run manually to check everything works
 ```
