@@ -2,16 +2,7 @@
 Functions to support operation of the Blinkt and Inky displays
 """
 
-from math import ceil
-from datetime import datetime, timedelta
-import pytz
-from tzlocal import get_localzone
-from PIL import Image, ImageFont, ImageDraw
-from font_roboto import RobotoMedium, RobotoBlack
 import yaml
-import blinkt
-from inky.auto import auto
-from inky.eeprom import read_eeprom
 
 # Blinkt! defaults
 DEFAULT_BRIGHTNESS = 10
@@ -24,6 +15,9 @@ def update_blinkt(conf: dict, blinkt_data: dict, demo: bool):
     """Recieve a parsed configuration file and price data from the database,
     as well as a flag indicating demo mode, and then update the Blinkt!
     display appropriately."""
+    
+    import blinkt
+    
     if demo:
         print ("Demo mode. Showing up to first 8 configured colours...")
         print(str(len(conf['Blinkt']['Colours'].items())) + ' colour levels found in config.yaml')
@@ -76,6 +70,20 @@ def update_inky(conf: dict, inky_data: dict, demo: bool):
     list of tuples. In each tuple, index [0] is the time in SQLite date
     format and index [1] is the price in p/kWh as a float. index [2] is
     the carbon intensity as an integer."""
+    
+    from math import ceil
+    from datetime import datetime, timedelta
+    import pytz
+    from tzlocal import get_localzone
+    from PIL import Image, ImageFont, ImageDraw
+    from font_roboto import RobotoMedium, RobotoBlack
+    from inky.auto import auto
+    from inky.eeprom import read_eeprom
+
+    inky_eeprom = read_eeprom()
+    if inky_eeprom is None:
+        raise SystemExit('Error: Inky pHAT display not found')
+
     local_tz = get_localzone()
 
     try:
@@ -391,10 +399,7 @@ def get_config() -> dict:
 
     elif _config['DisplayType'] == 'inkyphat':
         print ('Inky pHAT display selected.')
-        inky_eeprom = read_eeprom()
-        if inky_eeprom is None:
-            raise SystemExit('Error: Inky pHAT display not found')
-
+        
         conf_highprice = deep_get(_config, ['InkyPHAT', 'HighPrice'])
         if not (isinstance(conf_highprice, (int, float)) and 0 <= conf_highprice <= 35):
             print('Misconfigured high price value: ' + str(conf_highprice) +
@@ -424,3 +429,4 @@ def get_config() -> dict:
         raise SystemExit('Error: DNORegion not found in config.yaml')
 
     return _config
+    
