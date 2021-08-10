@@ -7,7 +7,11 @@ Here's the Blinkt! display (in Agile mode for this example, but it reads the sam
 
 Magenta is the most expensive or most carbon intensive, then red, orange, yellow, green, cyan, and blue. You can change the thresholds and colours easily by editing a configuration file (`config.yaml`).
 
-![Display in action](https://raw.githubusercontent.com/jerbzz/agile-blinkt-indicator/main/images/DSC_5094.jpg)
+![Blinkt! display in action](https://raw.githubusercontent.com/jerbzz/agile-blinkt-indicator/main/images/DSC_5094.jpg)
+
+The Inky display looks like this in carbon mode, and very similar in Agile mode. On the right hand side are the values for the next three slots. Then, the bottom right corner shows the time at which the 3 hours (the duration of this is configurable) with the lowest price or carbon intensity occur, and the length of time until those slots begin. The graph is yellow/red when the value is above the configured "High Value" - the current value and border also change colour at or above this value. The black parts of the graph correspond to the low value slots shown in the bottom right. The dashed line is the average for the data being displayed, and the x-axis labels are the hour portion of the 24 hour time.
+
+![Inky pHAT display in action](https://raw.githubusercontent.com/jerbzz/pi-eco-indicator/main/images/unnamed.jpg)
 
 # Hardware needed
 
