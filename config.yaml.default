@@ -26,7 +26,7 @@ DisplayType: blinkt
 
 InkyPHAT:
 
-    HighPrice: 15
+    HighPrice: 25
     # at or above this price, text and graph bars turn red/yellow.
     HighIntensity: 200
     # at or above this carbon intensity, text and graph bars turn red/yellow.
