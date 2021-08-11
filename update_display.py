@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# pylint: disable=invalid-name
 
 """Read Octopus Agile price data from an existing SQLite database and update a
    Pimoroni Blinkt! display."""
@@ -8,7 +9,6 @@ import os
 import sys
 from urllib.request import pathname2url
 import argparse
-import yaml
 import eco_indicator
 
 # Blinkt! defaults
@@ -20,7 +20,7 @@ DEFAULT_LOWSLOTDURATION = 3
 
 parser = argparse.ArgumentParser(description=('Update Eco Indicator display using SQLite data'))
 parser.add_argument('--demo', '-d', action='store_true',
-                    help= 'display demo data',)
+                    help='display demo data',)
 
 args = parser.parse_args()
 

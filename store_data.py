@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# pylint: disable=invalid-name
 
 """Use the public Octopus Energy API to request the half-hourly rates for the Agile tariff
 for a particular region, and insert these into an SQLite database, dealing with duplicate
@@ -9,17 +10,17 @@ import os
 import sys
 import time
 from reprlib import Repr
-from datetime import datetime, timedelta
+from datetime import datetime
 from urllib.request import pathname2url
 import pytz
 import requests
-import yaml
 import eco_indicator
 
 AGILE_API_BASE = (
-  'https://api.octopus.energy/v1/products/AGILE-18-02-21/electricity-tariffs/E-1R-AGILE-18-02-21-')
+    'https://api.octopus.energy/v1/products/'
+    'AGILE-18-02-21/electricity-tariffs/E-1R-AGILE-18-02-21-')
 
-AGILE_REGIONS = ['A','B','C','D','E','F','G','P','N','J','H','K','L','M']
+AGILE_REGIONS = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'P', 'N', 'J', 'H', 'K', 'L', 'M']
 
 AGILE_API_TAIL = "/standard-unit-rates/"
 
@@ -58,7 +59,7 @@ def get_data_from_api(_request_uri: str) -> dict:
     while retry_count <= MAX_RETRIES:
 
         if retry_count == MAX_RETRIES:
-            raise SystemExit ('API retry limit exceeded.')
+            raise SystemExit('API retry limit exceeded.')
 
         try:
             success = False
@@ -70,13 +71,13 @@ def get_data_from_api(_request_uri: str) -> dict:
 
         except requests.exceptions.HTTPError as error:
             print(('API HTTP error ' + str(response.status_code) +
-                  ',retrying in ' + str(2**retry_count) + 's'))
+                   ',retrying in ' + str(2**retry_count) + 's'))
             time.sleep(2**retry_count)
             retry_count += 1
 
         except requests.exceptions.ConnectionError as error:
             print(('API connection error: ' + my_repr.repr(str(error)) +
-                  ', retrying in ' + str(2**retry_count) + 's'))
+                   ', retrying in ' + str(2**retry_count) + 's'))
             time.sleep(2**retry_count)
             retry_count += 1
 
@@ -93,12 +94,11 @@ def get_data_from_api(_request_uri: str) -> dict:
             break
 
 
-def insert_data (data: dict):
+def insert_data(data: dict):
     """Insert our data records one by one, keep track of how many were successfully inserted
     and print the results of the insertion."""
 
     num_rows_inserted = 0
-    num_duplicates = 0
 
     if config['Mode'] == 'agile_price':
         for result in data['results']:
@@ -106,12 +106,10 @@ def insert_data (data: dict):
             # or true if a record was successfully entered.
             if insert_record(result['valid_from'], result['value_inc_vat']):
                 num_rows_inserted += 1
-            else:
-                num_duplicates += 1
 
         if num_rows_inserted > 0:
             lastslot = datetime.strftime(datetime.strptime(
-                data['results'][0]['valid_to'],"%Y-%m-%dT%H:%M:%SZ"),"%H:%M on %A %d %b")
+                data['results'][0]['valid_to'], "%Y-%m-%dT%H:%M:%SZ"), "%H:%M on %A %d %b")
             print(str(num_rows_inserted) + ' prices were inserted, ending at ' + lastslot + '.')
         else:
             print('No prices were inserted - maybe we have them'
@@ -124,21 +122,17 @@ def insert_data (data: dict):
             carbon_data = data['data']['data']
 
         for result in carbon_data:
-
             if insert_record(result['from'], result['intensity']['forecast']):
                 num_rows_inserted += 1
-            else:
-                num_duplicates += 1
+
         if num_rows_inserted > 0:
             lastslot = datetime.strftime(datetime.strptime(
-                carbon_data[47]['from'],"%Y-%m-%dT%H:%MZ"),"%H:%M on %A %d %b")
-            print(str(num_rows_inserted) + ' intensities were inserted, ending at ' + lastslot + '.')
+                carbon_data[47]['from'], "%Y-%m-%dT%H:%MZ"), "%H:%M on %A %d %b")
+            print(str(num_rows_inserted) + ' intensities were inserted, '
+                  'ending at ' + lastslot + '.')
         else:
             print('No values were inserted - maybe we have them'
                   ' already, or carbonintensity.org.uk are late with their update.')
-
-    if num_duplicates > 0:
-        print('Ignoring ' + str(num_duplicates) + ' duplicate rows...')
 
 def insert_record(valid_from: str, data_value: float) -> bool:
     """Assuming we still have a cursor, take a tuple and stick it into the database.
@@ -163,14 +157,13 @@ def insert_record(valid_from: str, data_value: float) -> bool:
 
         except sqlite3.Error as error:
             raise SystemError('Database error: ' + str(error)) from error
-            return False
 
         else:
             return True # the record was inserted
 
     if config['Mode'] == 'carbon':
         valid_from_formatted = datetime.strftime(
-        datetime.strptime(valid_from, "%Y-%m-%dT%H:%MZ"), "%Y-%m-%d %H:%M:%S")
+            datetime.strptime(valid_from, "%Y-%m-%dT%H:%MZ"), "%Y-%m-%d %H:%M:%S")
 
         data_tuple = (valid_from_formatted, data_value)
         # print(data_tuple) # debug
@@ -181,10 +174,11 @@ def insert_record(valid_from: str, data_value: float) -> bool:
 
         except sqlite3.Error as error:
             raise SystemError('Database error: ' + str(error)) from error
-            return False
 
         else:
             return True # the record was inserted
+
+    return False
 
 def remove_old_data(age: str):
     """Delete old data from the database, we don't want to display those and we don't want it
@@ -193,7 +187,7 @@ def remove_old_data(age: str):
         raise SystemExit('Database connection lost before pruning data!')
     try:
         cursor.execute("SELECT COUNT(*) FROM eco "
-            "WHERE valid_from < datetime('now', '-" + age + "')")
+                       "WHERE valid_from < datetime('now', '-" + age + "')")
         selected_rows = cursor.fetchall()
         num_old_rows = selected_rows[0][0]
         # I don't know why this doesn't just return an int rather than a list of a list of an int
@@ -230,7 +224,7 @@ elif config['Mode'] == 'carbon':
     # Build the API for the request - public API so no authentication required
     request_time = datetime.now().astimezone(pytz.utc).isoformat()
     request_uri = (CARBON_API_BASE + CARBON_REGIONS[DNO_REGION])
-    request_uri = request_uri.format(from_time = request_time)
+    request_uri = request_uri.format(from_time=request_time)
 
 try:
     # connect to the database in rw mode so we can catch the error if it doesn't exist
@@ -247,7 +241,7 @@ except sqlite3.OperationalError:
     # UNIQUE constraint prevents duplication of data on multiple runs of this script
     # ON CONFLICT FAIL allows us to count how many times this happens
     cursor.execute('CREATE TABLE eco (valid_from STRING PRIMARY KEY ON CONFLICT REPLACE, '
-                    'value_inc_vat REAL, intensity REAL)')
+                   'value_inc_vat REAL, intensity REAL)')
     conn.commit()
     print('Database created... ')
 
