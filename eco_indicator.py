@@ -191,7 +191,7 @@ def update_inky(conf: dict, inky_data: dict, demo: bool):
         # also highlight display with a coloured border if current price is high
         font = ImageFont.truetype(RobotoBlack, size = int(45 * font_scale_factor))
         message = format_str.format(inky_data[0][tuple_idx]) + short_unit
-        x_pos = 0 * x_padding_factor
+        x_pos = 4 * x_padding_factor
         y_pos = 8 * y_padding_factor
 
         slot_start = str(datetime.strftime(pytz.utc.localize(datetime.strptime(inky_data[0][0],
