@@ -15,11 +15,11 @@ def update_blinkt(conf: dict, blinkt_data: dict, demo: bool):
     """Recieve a parsed configuration file and price data from the database,
     as well as a flag indicating demo mode, and then update the Blinkt!
     display appropriately."""
-    
+
     import blinkt
-    
+
     if demo:
-        print ("Demo mode. Showing up to first 8 configured colours...")
+        print("Demo mode. Showing up to first 8 configured colours...")
         print(str(len(conf['Blinkt']['Colours'].items())) + ' colour levels found in config.yaml')
         blinkt.clear()
         i = 0
@@ -57,7 +57,7 @@ def update_blinkt(conf: dict, blinkt_data: dict, demo: bool):
             if i == 8:
                 break
 
-        print ("Setting display...")
+        print("Setting display...")
         blinkt.set_clear_on_exit(False)
         blinkt.show()
 
@@ -70,7 +70,7 @@ def update_inky(conf: dict, inky_data: dict, demo: bool):
     list of tuples. In each tuple, index [0] is the time in SQLite date
     format and index [1] is the price in p/kWh as a float. index [2] is
     the carbon intensity as an integer."""
-    
+
     from math import ceil
     from datetime import datetime, timedelta
     import pytz
@@ -118,7 +118,7 @@ def update_inky(conf: dict, inky_data: dict, demo: bool):
         high_value = conf['InkyPHAT']['HighIntensity']
         format_str = "{:.0f}"
         graph_y_unit = graph_y_unit / 15
-    
+
     if conf['Mode'] == "agile_price":
         tuple_idx = 1
         short_unit = "p"
@@ -127,7 +127,7 @@ def update_inky(conf: dict, inky_data: dict, demo: bool):
         format_str = "{0:.1f}"
 
     if demo:
-        print ("Demo mode... (not implemented!)")
+        print("Demo mode... (not implemented!)")
 
     else:
         # figure out cheapest slots
@@ -141,17 +141,16 @@ def update_inky(conf: dict, inky_data: dict, demo: bool):
         low_slots_average = format_str.format(min(low_slots_list))
 
         low_slots_start_time = str(datetime.strftime(pytz.utc.localize(
-                              datetime.strptime(inky_data[low_slots_start_idx][0],
-                              "%Y-%m-%d %H:%M:%S"),
-                              is_dst=None).astimezone(local_tz), "%H:%M"))
+            datetime.strptime(inky_data[low_slots_start_idx][0], "%Y-%m-%d %H:%M:%S"),
+            is_dst=None).astimezone(local_tz), "%H:%M"))
+
         print("Lowest " + str(low_slot_duration) + " hours: average " +
               low_slots_average + short_unit + "/kWh at " + low_slots_start_time + ".")
 
-        min_slot = min(inky_data, key = lambda inky_data: inky_data[tuple_idx])
+        min_slot = min(inky_data, key=lambda inky_data: inky_data[tuple_idx])
         min_slot_value = str(min_slot[tuple_idx])
-        min_slot_time = str(datetime.strftime(pytz.utc.localize(datetime.strptime(min_slot[0],
-                              "%Y-%m-%d %H:%M:%S"),
-                              is_dst=None).astimezone(local_tz), "%H:%M"))
+        min_slot_time = str(datetime.strftime(pytz.utc.localize(datetime.strptime(
+            min_slot[0], "%Y-%m-%d %H:%M:%S"), is_dst=None).astimezone(local_tz), "%H:%M"))
 
         print("Lowest value slot: " + min_slot_value + short_unit + " at " + min_slot_time + ".")
 
@@ -182,14 +181,14 @@ def update_inky(conf: dict, inky_data: dict, demo: bool):
             bar_y_height = slot_data[tuple_idx] * graph_y_unit
 
             draw.rectangle(((i + 1) * graph_x_unit, graph_bottom,
-                          (((i + 1) * graph_x_unit) - graph_x_unit),
-                          (graph_bottom - bar_y_height)), colour)
+                            (((i + 1) * graph_x_unit) - graph_x_unit),
+                            (graph_bottom - bar_y_height)), colour)
             i += 1
         # graph solid bars finished
 
         # draw current price, in colour if it's high...
         # also highlight display with a coloured border if current price is high
-        font = ImageFont.truetype(RobotoBlack, size = int(45 * font_scale_factor))
+        font = ImageFont.truetype(RobotoBlack, size=int(45 * font_scale_factor))
         message = format_str.format(inky_data[0][tuple_idx]) + short_unit
         x_pos = 4 * x_padding_factor
         y_pos = 8 * y_padding_factor
@@ -207,20 +206,20 @@ def update_inky(conf: dict, inky_data: dict, demo: bool):
             print("Current value from " + slot_start + ": " + message)
 
         # draw time info above current price...
-        font = ImageFont.truetype(RobotoMedium, size = int(15 * font_scale_factor))
+        font = ImageFont.truetype(RobotoMedium, size=int(15 * font_scale_factor))
         message = descriptor + slot_start + "    " # trailing spaces prevent text clipping
         x_pos = 4 * x_padding_factor
         y_pos = 0 * y_padding_factor
         draw.text((x_pos, y_pos), message, inky_display.BLACK, font)
 
         mins_until_next_slot = ceil((pytz.utc.localize(datetime.strptime(
-                                inky_data[1][0], "%Y-%m-%d %H:%M:%S"), is_dst=None) - datetime.now(
-                                pytz.timezone("UTC"))).total_seconds() / 60)
+            inky_data[1][0], "%Y-%m-%d %H:%M:%S"), is_dst=None) - datetime.now(
+                pytz.timezone("UTC"))).total_seconds() / 60)
 
         print(str(mins_until_next_slot) + " mins until next slot.")
 
         # draw next 3 slot times...
-        font = ImageFont.truetype(RobotoMedium, size = int(15 * font_scale_factor))
+        font = ImageFont.truetype(RobotoMedium, size=int(15 * font_scale_factor))
         x_pos = 130 * x_padding_factor
         for i in range(3):
             message = "+" + str(mins_until_next_slot + (i * 30)) + ":    "
@@ -242,12 +241,12 @@ def update_inky(conf: dict, inky_data: dict, demo: bool):
         # draw separator line...
         ypos = 5 * y_padding_factor + (3 * 18 * y_padding_factor)
         draw.line((130 * x_padding_factor, ypos, inky_display.WIDTH - 5, ypos),
-                   fill=inky_display.BLACK, width=2)
+                  fill=inky_display.BLACK, width=2)
 
         # draw lowest slots info...
         x_pos = 130 * x_padding_factor
         y_pos = 10 * y_padding_factor + (3 * 18 * y_padding_factor)
-        font = ImageFont.truetype(RobotoMedium, size = int(13 * font_scale_factor))
+        font = ImageFont.truetype(RobotoMedium, size=int(13 * font_scale_factor))
 
         if '.' in str(low_slot_duration):
             lsd_text = str(low_slot_duration).rstrip('0').rstrip('.')
@@ -259,12 +258,13 @@ def update_inky(conf: dict, inky_data: dict, demo: bool):
 
         y_pos = 16 * (y_padding_factor * 0.6) + (4 * 18 * y_padding_factor)
 
-        min_slot_timedelta = datetime.strptime(inky_data[low_slots_start_idx][0],
-                              "%Y-%m-%d %H:%M:%S") - datetime.strptime(
-                             inky_data[0][0], "%Y-%m-%d %H:%M:%S")
+        min_slot_timedelta = datetime.strptime(
+            inky_data[low_slots_start_idx][0],
+            "%Y-%m-%d %H:%M:%S") - datetime.strptime(inky_data[0][0], "%Y-%m-%d %H:%M:%S")
+
         draw.text((x_pos, y_pos), low_slots_start_time + "/" +
                   str(min_slot_timedelta.total_seconds() / 3600) +
-                   "h    ", inky_display.BLACK, font)
+                  "h    ", inky_display.BLACK, font)
 
         # draw graph outline (last so it's over the top of everything else)
         i = 0
@@ -278,14 +278,14 @@ def update_inky(conf: dict, inky_data: dict, demo: bool):
 
             # horizontal lines...
             draw.line(((i + 1) * graph_x_unit, graph_bottom - bar_y_height,
-                     ((i + 1) * graph_x_unit) - graph_x_unit,
-                     graph_bottom - bar_y_height), colour)
+                       ((i + 1) * graph_x_unit) - graph_x_unit,
+                       graph_bottom - bar_y_height), colour)
 
             # vertical lines...
             if i == 0: # skip the first vertical line
                 continue
             draw.line((i * graph_x_unit, graph_bottom - bar_y_height,
-                     i * graph_x_unit, graph_bottom - prev_bar_y_height), colour)
+                       i * graph_x_unit, graph_bottom - prev_bar_y_height), colour)
 
             i += 1
 
@@ -295,9 +295,9 @@ def update_inky(conf: dict, inky_data: dict, demo: bool):
         # draw graph hour marker text...
         for i in range(2, 24, 3):
             colour = inky_display.BLACK
-            font = ImageFont.truetype(RobotoMedium, size = int(10 * font_scale_factor))
+            font = ImageFont.truetype(RobotoMedium, size=int(10 * font_scale_factor))
             x_pos = i * graph_x_unit * 2 # it's half hour slots!!
-            hours = datetime.strftime(datetime.now() + timedelta(hours=i),"%H")
+            hours = datetime.strftime(datetime.now() + timedelta(hours=i), "%H")
             hours_w, hours_h = font.getsize(hours) # we want to centre the labels
             y_pos = graph_bottom + 1
             if x_pos + hours_w / 2 > 128 * x_padding_factor:
@@ -317,7 +317,7 @@ def update_inky(conf: dict, inky_data: dict, demo: bool):
 
         average_line_ypos = graph_bottom - average_slot_data * graph_y_unit
 
-        for x_pos in range (0, int(126 * x_padding_factor)):
+        for x_pos in range(0, int(126 * x_padding_factor)):
             if x_pos % 6 == 2: # repeat every 6 pixels starting at 2
                 draw.line((x_pos, average_line_ypos, x_pos + 2, average_line_ypos),
                           inky_display.BLACK)
@@ -329,17 +329,17 @@ def clear_display(conf: dict):
     """Determine what type of display is connected and
     use the appropriate method to clear it."""
     if conf['DisplayType'] == 'blinkt':
-        print ('Clearing Blinkt! display...')
+        print('Clearing Blinkt! display...')
         blinkt.clear()
         blinkt.show()
-        print ('Done.')
+        print('Done.')
 
     elif conf['DisplayType'] == 'inkyphat':
         inky_eeprom = read_eeprom()
         if inky_eeprom is None:
             raise SystemExit('Error: Inky pHAT display not found')
 
-        print ('Clearing Inky pHAT display...')
+        print('Clearing Inky pHAT display...')
         inky_display = auto(ask_user=True, verbose=True)
         colours = (inky_display.RED, inky_display.BLACK, inky_display.WHITE)
         img = Image.new("P", (inky_display.WIDTH, inky_display.HEIGHT))
@@ -352,7 +352,7 @@ def clear_display(conf: dict):
             inky_display.set_image(img)
             inky_display.show()
 
-        print ('Done.')
+        print('Done.')
 
 def deep_get(this_dict: dict, keys: str, default=None):
     """
@@ -388,7 +388,7 @@ def get_config() -> dict:
         raise SystemExit('Error: DisplayType not found in config.yaml')
 
     if _config['DisplayType'] == 'blinkt':
-        print ('Blinkt! display selected.')
+        print('Blinkt! display selected.')
         conf_brightness = deep_get(_config, ['Blinkt', 'Brightness'])
         if not (isinstance(conf_brightness, int) and 5 <= conf_brightness <= 100):
             print('Misconfigured brightness value: ' + str(conf_brightness) +
@@ -398,8 +398,8 @@ def get_config() -> dict:
             raise SystemExit('Error: Less than two colour levels found in config.yaml')
 
     elif _config['DisplayType'] == 'inkyphat':
-        print ('Inky pHAT display selected.')
-        
+        print('Inky pHAT display selected.')
+
         conf_highprice = deep_get(_config, ['InkyPHAT', 'HighPrice'])
         if not (isinstance(conf_highprice, (int, float)) and 0 <= conf_highprice <= 35):
             print('Misconfigured high price value: ' + str(conf_highprice) +
@@ -413,15 +413,15 @@ def get_config() -> dict:
                   ' Using default of ' + str(DEFAULT_LOWSLOTDURATION) + '.')
             _config['InkyPHAT']['LowSlotDuration'] = DEFAULT_LOWSLOTDURATION
     else:
-        raise SystemExit('Error: unknown DisplayType ' + _config['DisplayType'] + ' in config.yaml' )
+        raise SystemExit('Error: unknown DisplayType ' + _config['DisplayType'] + ' in config.yaml')
 
     if _config['Mode'] is None:
         raise SystemExit('Error: Mode not found in config.yaml')
 
     if _config['Mode'] == 'agile_price':
-        print ('Working in Octopus Agile price mode.')
+        print('Working in Octopus Agile price mode.')
     elif _config['Mode'] == 'carbon':
-        print ('Working in carbon intensity mode.')
+        print('Working in carbon intensity mode.')
     else:
         raise SystemExit('Error: Unknown mode found in config.yaml: ' + _config['Mode'])
 
@@ -429,4 +429,3 @@ def get_config() -> dict:
         raise SystemExit('Error: DNORegion not found in config.yaml')
 
     return _config
-    
