@@ -1,7 +1,7 @@
 # pi-eco-indicator
 Display upcoming Octopus Agile prices, or carbon intensity from [National Grid](https://carbonintensity.org.uk/) on the Pimoroni Blinkt! display or the Pimoroni Inky pHAT display for Raspberry Pi, with no external dependencies - data is fetched directly from public APIs and stored locally. Designed to be simple to set up and use for people with no coding knowledge. Other displays may be supported in the future.
 
-Should you wish to purchase a preconfigured device, I have an [Etsy shop here](https://www.etsy.com/uk/listing/968401316/octopus-energy-agile-tariff-price).
+Should you wish to purchase a preconfigured device, I have an [Etsy shop here](https://www.etsy.com/uk/shop/jerbzz).
 
 Here's the Blinkt! display (in Agile mode for this example, but it reads the same both ways.). Read it from left to right. Each pixel represents a half hour slot, so you get 3.5 to 4 hours of data depending on when you look at it! The leftmost pixel represents the current value. On the half hour, every half hour, everything shifts one pixel to the left.
 
