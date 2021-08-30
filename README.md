@@ -41,7 +41,7 @@ sudo apt install -y python3-tzlocal
 pip3 install font-roboto
 ```
 # How to get this code
-Once you have installed the Pimoroni software as above, the easiest way to download this software is to copy and paste the following command, which will make a copy of all the files in a folder called **agile-blinkt-indicator** in your home directory. This won't work unless you've installed the Blinkt! library above (or installed `git` yourself).
+Once you have installed the Pimoroni software as above, the easiest way to download this software is to copy and paste the following command, which will make a copy of all the files in a folder called **pi-eco-indicator** in your home directory. This won't work unless you've installed the Blinkt! library above (or installed `git` yourself).
 
 ```
 cd ~ && git -c advice.detachedHead=false clone --depth 1 -b v2.0.1 https://github.com/jerbzz/pi-eco-indicator.git
