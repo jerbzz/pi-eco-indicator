@@ -65,7 +65,7 @@ and look for `DNORegion: Z` at the very top. Replace this with your correct DNO 
 
 You should initially run manually to check everything works
 ```
-./store_prices.py
+./store_data.py
 ```
 
 The code will tell you what it's doing and whether it worked. You can run this as many times as you like without causing too many problems. 
@@ -112,14 +112,14 @@ If something isn't working, run
 ```
 less ~/pi-eco-indicator/eco_indicator.log
 ```
-This will show you the most recent message from any of the scripts (that were run automatically by `cron`). If this doesn't shed any light, run `./store_prices.py` and `./update_display.py` and see what they moan about!
+This will show you the most recent message from any of the scripts (that were run automatically by `cron`). If this doesn't shed any light, run `./store_data.py` and `./update_display.py` and see what they moan about!
 
 # Modification
 
 If you want to change price/carbon intensity thresholds, change mode, or fine-tune the colours, they are located in `config.yaml`. Open it using `nano config.yaml` or your favourite editor. I recommend that if you change mode, you delete the SQLite database first:
 
 ```
-rm ~\pi-eco-indicator\eco_indicator.sqlite
+rm ~/pi-eco-indicator/eco_indicator.sqlite
 ```
 
 It's really important that you don't change the layout of the file otherwise you will encounter errors when trying to run the software. Each option has comments describing its effects - read, and change to your heart's content.
