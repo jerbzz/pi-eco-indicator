@@ -130,7 +130,7 @@ def update_inky(conf: dict, inky_data: dict, demo: bool):
         print("Demo mode... (not implemented!)")
 
     else:
-        # figure out cheapest slots
+        # figure out cheapest/lowest slots
         low_slot_duration = conf['InkyPHAT']['LowSlotDuration']
         num_low_slots = int(2 * low_slot_duration)
         inky_data_only = [slot_data[tuple_idx] for slot_data in inky_data]

@@ -27,21 +27,21 @@ AGILE_API_TAIL = "/standard-unit-rates/"
 
 CARBON_API_BASE = ('https://api.carbonintensity.org.uk')
 
-CARBON_REGIONS = {'A': '/regional/intensity/{from_time}/fw24h/regionid/10',
-                  'B': '/regional/intensity/{from_time}/fw24h/regionid/9',
-                  'C': '/regional/intensity/{from_time}/fw24h/regionid/13',
-                  'D': '/regional/intensity/{from_time}/fw24h/regionid/6',
-                  'E': '/regional/intensity/{from_time}/fw24h/regionid/8',
-                  'F': '/regional/intensity/{from_time}/fw24h/regionid/4',
-                  'G': '/regional/intensity/{from_time}/fw24h/regionid/3',
-                  'P': '/regional/intensity/{from_time}/fw24h/regionid/1',
-                  'N': '/regional/intensity/{from_time}/fw24h/regionid/2',
-                  'J': '/regional/intensity/{from_time}/fw24h/regionid/14',
-                  'H': '/regional/intensity/{from_time}/fw24h/regionid/12',
-                  'K': '/regional/intensity/{from_time}/fw24h/regionid/7',
-                  'L': '/regional/intensity/{from_time}/fw24h/regionid/11',
-                  'M': '/regional/intensity/{from_time}/fw24h/regionid/5',
-                  'Z': '/intensity/{from_time}/fw24h'}
+CARBON_REGIONS = {'A': '/regional/intensity/{from_time}/fw48h/regionid/10',
+                  'B': '/regional/intensity/{from_time}/fw48h/regionid/9',
+                  'C': '/regional/intensity/{from_time}/fw48h/regionid/13',
+                  'D': '/regional/intensity/{from_time}/fw48h/regionid/6',
+                  'E': '/regional/intensity/{from_time}/fw48h/regionid/8',
+                  'F': '/regional/intensity/{from_time}/fw48h/regionid/4',
+                  'G': '/regional/intensity/{from_time}/fw48h/regionid/3',
+                  'P': '/regional/intensity/{from_time}/fw48h/regionid/1',
+                  'N': '/regional/intensity/{from_time}/fw48h/regionid/2',
+                  'J': '/regional/intensity/{from_time}/fw48h/regionid/14',
+                  'H': '/regional/intensity/{from_time}/fw48h/regionid/12',
+                  'K': '/regional/intensity/{from_time}/fw48h/regionid/7',
+                  'L': '/regional/intensity/{from_time}/fw48h/regionid/11',
+                  'M': '/regional/intensity/{from_time}/fw48h/regionid/5',
+                  'Z': '/intensity/{from_time}/fw48h'}
 
 MAX_RETRIES = 15 # give up once we've tried this many times to get the prices from the API
 

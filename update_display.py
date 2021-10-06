@@ -38,18 +38,23 @@ except sqlite3.OperationalError as error:
     # handle missing database case
     raise SystemExit('Database not found - you need to run store_data.py first.') from error
 
-cursor.execute("SELECT * FROM eco WHERE valid_from > datetime('now', '-30 minutes')")
-data_rows = cursor.fetchall()
-
-# finish up the database operation
-if conn:
-    conn.commit()
-    conn.close()
-
 config = eco_indicator.get_config(conf_file)
+
+if config['Mode'] == 'agile_price':
+    cursor.execute("SELECT * FROM eco WHERE valid_from > datetime('now', '-30 minutes') AND value_inc_vat IS NOT NULL")
+    data_rows = cursor.fetchall()
+
+if config['Mode'] == 'carbon':
+    cursor.execute("SELECT * FROM eco WHERE valid_from > datetime('now', '-30 minutes') AND intensity IS NOT NULL")
+    data_rows = cursor.fetchall()
 
 if config['DisplayType'] == 'blinkt':
     eco_indicator.update_blinkt(config, data_rows, args.demo)
 
 if config['DisplayType'] == 'inkyphat':
     eco_indicator.update_inky(config, data_rows, args.demo)
+
+# finish up the database operation
+if conn:
+    conn.commit()
+    conn.close()
