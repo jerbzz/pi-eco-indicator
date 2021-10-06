@@ -14,6 +14,7 @@ from datetime import datetime
 from urllib.request import pathname2url
 import pytz
 import requests
+import argparse
 import eco_indicator
 
 AGILE_API_BASE = (
@@ -43,6 +44,12 @@ CARBON_REGIONS = {'A': '/regional/intensity/{from_time}/fw24h/regionid/10',
                   'Z': '/intensity/{from_time}/fw24h'}
 
 MAX_RETRIES = 15 # give up once we've tried this many times to get the prices from the API
+
+parser = argparse.ArgumentParser(description=('Read data from a remote API and store it in a local SQlite database'))
+parser.add_argument('--conf', '-c', default='config.yaml', help='specify config file')
+
+args = parser.parse_args()
+conf_file = args.conf
 
 def get_data_from_api(_request_uri: str) -> dict:
     """using the provided URI, request data from the API and return a JSON object.
@@ -153,7 +160,7 @@ def insert_record(valid_from: str, data_value: float) -> bool:
 
         try:
             cursor.execute(
-                "INSERT INTO 'eco'('valid_from', 'value_inc_vat') VALUES (?, ?);", data_tuple)
+                "INSERT INTO 'eco'('valid_from', 'value_inc_vat') VALUES (?, ?) ON CONFLICT(valid_from) DO UPDATE SET value_inc_vat=excluded.value_inc_vat;", data_tuple)
 
         except sqlite3.Error as error:
             raise SystemError('Database error: ' + str(error)) from error
@@ -170,7 +177,7 @@ def insert_record(valid_from: str, data_value: float) -> bool:
 
         try:
             cursor.execute(
-                "INSERT INTO 'eco'('valid_from', 'intensity') VALUES (?, ?);", data_tuple)
+                "INSERT INTO 'eco'('valid_from', 'intensity') VALUES (?, ?) ON CONFLICT(valid_from) DO UPDATE SET intensity=excluded.intensity;", data_tuple)
 
         except sqlite3.Error as error:
             raise SystemError('Database error: ' + str(error)) from error
@@ -200,7 +207,7 @@ def remove_old_data(age: str):
         print('Failed while trying to remove old data points from database: ', error)
 
 os.chdir(os.path.dirname(sys.argv[0]))
-config = eco_indicator.get_config()
+config = eco_indicator.get_config(conf_file)
 
 if config['Mode'] == 'agile_price':
     DNO_REGION = config['DNORegion']

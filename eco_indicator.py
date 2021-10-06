@@ -193,8 +193,9 @@ def update_inky(conf: dict, inky_data: dict, demo: bool):
         x_pos = 4 * x_padding_factor
         y_pos = 8 * y_padding_factor
 
-        slot_start = str(datetime.strftime(pytz.utc.localize(datetime.strptime(inky_data[0][0],
-                         "%Y-%m-%d %H:%M:%S"), is_dst=None).astimezone(local_tz), "%H:%M"))
+        slot_start = str(datetime.strftime(pytz.utc.localize(datetime.strptime(
+            inky_data[0][0], "%Y-%m-%d %H:%M:%S"), is_dst=None).astimezone(
+                local_tz), "%H:%M"))
 
         if inky_data[0][tuple_idx] > high_value:
             draw.text((x_pos, y_pos), message, inky_display.RED, font)
@@ -369,15 +370,15 @@ def deep_get(this_dict: dict, keys: str, default=None):
         return this_dict
     return deep_get(this_dict.get(keys[0]), keys[1:], default)
 
-def get_config() -> dict:
+def get_config(filename: str) -> dict:
     """
     Read config file and do some basic checks that we have what we need.
     If not, set sensible defaults or bail out.
     """
     try:
-        config_file = open('config.yaml', 'r')
+        config_file = open(filename, 'r')
     except FileNotFoundError as no_config:
-        raise SystemExit('Unable to find config.yaml') from no_config
+        raise SystemExit('Unable to find ' + filename) from no_config
 
     try:
         _config = yaml.safe_load(config_file)
@@ -385,7 +386,7 @@ def get_config() -> dict:
         raise SystemExit('Error reading configuration: ' + str(config_err)) from config_err
 
     if _config['DisplayType'] is None:
-        raise SystemExit('Error: DisplayType not found in config.yaml')
+        raise SystemExit('Error: DisplayType not found in ' + filename)
 
     if _config['DisplayType'] == 'blinkt':
         print('Blinkt! display selected.')
@@ -395,7 +396,7 @@ def get_config() -> dict:
                   '. Using default of ' + str(DEFAULT_BRIGHTNESS) + '.')
             _config['Blinkt']['Brightness'] = DEFAULT_BRIGHTNESS
         if len(_config['Blinkt']['Colours'].items()) < 2:
-            raise SystemExit('Error: Less than two colour levels found in config.yaml')
+            raise SystemExit('Error: Less than two colour levels found in ' + filename)
 
     elif _config['DisplayType'] == 'inkyphat':
         print('Inky pHAT display selected.')
@@ -413,19 +414,19 @@ def get_config() -> dict:
                   ' Using default of ' + str(DEFAULT_LOWSLOTDURATION) + '.')
             _config['InkyPHAT']['LowSlotDuration'] = DEFAULT_LOWSLOTDURATION
     else:
-        raise SystemExit('Error: unknown DisplayType ' + _config['DisplayType'] + ' in config.yaml')
+        raise SystemExit('Error: unknown DisplayType ' + _config['DisplayType'] + ' in ' + filename)
 
     if _config['Mode'] is None:
-        raise SystemExit('Error: Mode not found in config.yaml')
+        raise SystemExit('Error: Mode not found in ' + filename)
 
     if _config['Mode'] == 'agile_price':
         print('Working in Octopus Agile price mode.')
     elif _config['Mode'] == 'carbon':
         print('Working in carbon intensity mode.')
     else:
-        raise SystemExit('Error: Unknown mode found in config.yaml: ' + _config['Mode'])
+        raise SystemExit('Error: Unknown mode found in ' +  + filename + ': ' + _config['Mode'])
 
     if 'DNORegion' not in _config:
-        raise SystemExit('Error: DNORegion not found in config.yaml')
+        raise SystemExit('Error: DNORegion not found in '  + filename)
 
     return _config

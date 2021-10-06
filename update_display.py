@@ -19,10 +19,11 @@ DEFAULT_HIGHPRICE = 15.0
 DEFAULT_LOWSLOTDURATION = 3
 
 parser = argparse.ArgumentParser(description=('Update Eco Indicator display using SQLite data'))
-parser.add_argument('--demo', '-d', action='store_true',
-                    help='display demo data',)
+parser.add_argument('--demo', '-d', action='store_true', help='display demo data')
+parser.add_argument('--conf', '-c', default='config.yaml', help='specify config file')
 
 args = parser.parse_args()
+conf_file = args.conf
 
 os.chdir(os.path.dirname(sys.argv[0]))
 
@@ -45,7 +46,7 @@ if conn:
     conn.commit()
     conn.close()
 
-config = eco_indicator.get_config()
+config = eco_indicator.get_config(conf_file)
 
 if config['DisplayType'] == 'blinkt':
     eco_indicator.update_blinkt(config, data_rows, args.demo)

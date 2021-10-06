@@ -5,19 +5,19 @@
    use the appropriate method to clear it."""
 
 import yaml
+import eco_indicator
+import argparse
 
-try:
-    config_file = open("config.yaml", "r")
-except FileNotFoundError as no_config:
-    raise SystemExit("Unable to find config.yaml") from no_config
+parser = argparse.ArgumentParser(description=('Clear the attached display'))
+parser.add_argument('--conf', '-c', default='config.yaml', help='specify config file')
 
-try:
-    config = yaml.safe_load(config_file)
-except yaml.YAMLError as config_err:
-    raise SystemExit("Error reading configuration: " + str(config_err)) from config_err
+args = parser.parse_args()
+conf_file = args.conf
+
+config = eco_indicator.get_config(conf_file)
 
 if "DisplayType" not in config:
-    raise SystemExit("Error: DisplayType not found in config.yaml")
+    raise SystemExit("Error: DisplayType not found in " + conf_file)
 
 if config['DisplayType'] == "blinkt":
     import blinkt
@@ -50,4 +50,4 @@ elif config['DisplayType'] == "inkyphat":
     print("Done.")
 
 else:
-    raise SystemExit("Error: unknown DisplayType " + config['DisplayType'] + " in config.yaml")
+    raise SystemExit("Error: unknown DisplayType " + config['DisplayType'] + " in " + conf_file)
