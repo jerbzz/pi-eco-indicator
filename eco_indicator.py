@@ -97,7 +97,7 @@ def update_inky(conf: dict, inky_data: dict, demo: bool):
 
     # deal with scaling for newer SSD1608 pHATs
     if inky_display.resolution == (250, 122):
-        graph_y_unit = 2.3
+        graph_y_unit = 1.2
         graph_x_unit = 4 # needs to be int to avoid aliasing
         font_scale_factor = 1.2
         x_padding_factor = 1.25
@@ -105,7 +105,7 @@ def update_inky(conf: dict, inky_data: dict, demo: bool):
 
     # original Inky pHAT
     if inky_display.resolution == (212, 104):
-        graph_y_unit = 2
+        graph_y_unit = 1
         graph_x_unit = 3 # needs to be int to avoid aliasing
         font_scale_factor = 1
         x_padding_factor = 1
