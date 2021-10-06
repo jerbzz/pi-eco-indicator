@@ -117,7 +117,7 @@ def update_inky(conf: dict, inky_data: dict, demo: bool):
         descriptor = "Carbon at "
         high_value = conf['InkyPHAT']['HighIntensity']
         format_str = "{:.0f}"
-        graph_y_unit = graph_y_unit / 15
+        graph_y_unit = graph_y_unit / 7
 
     if conf['Mode'] == "agile_price":
         tuple_idx = 1
