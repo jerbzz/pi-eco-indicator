@@ -44,7 +44,7 @@ pip3 install font-roboto
 Once you have installed the Pimoroni software as above, the easiest way to download this software is to copy and paste the following command, which will make a copy of all the files in a folder called **pi-eco-indicator** in your home directory. This won't work unless you've installed the Blinkt! library above (or installed `git` yourself).
 
 ```
-cd ~ && git -c advice.detachedHead=false clone --depth 1 -b v2.0.1 https://github.com/jerbzz/pi-eco-indicator.git
+cd ~ && git -c advice.detachedHead=false clone --depth 1 -b v2.1.0 https://github.com/jerbzz/pi-eco-indicator.git
 ```
 # How to use this code
 
@@ -116,13 +116,11 @@ This will show you the most recent message from any of the scripts (that were ru
 
 # Modification
 
-If you want to change price/carbon intensity thresholds, change mode, or fine-tune the colours, they are located in `config.yaml`. Open it using `nano config.yaml` or your favourite editor. I recommend that if you change mode, you delete the SQLite database first:
-
-```
-rm ~/pi-eco-indicator/eco_indicator.sqlite
-```
+If you want to change price/carbon intensity thresholds, change mode, or fine-tune the colours, they are located in `config.yaml`. Open it using `nano config.yaml` or your favourite editor. 
 
 It's really important that you don't change the layout of the file otherwise you will encounter errors when trying to run the software. Each option has comments describing its effects - read, and change to your heart's content.
+
+You can also create multiple config files, or store the config file in a different location, use the `-c` or `--conf` flag on the command line.
 
 # To Do:
 
