@@ -47,6 +47,7 @@ MAX_RETRIES = 15 # give up once we've tried this many times to get the prices fr
 
 parser = argparse.ArgumentParser(description=('Read data from a remote API and store it in a local SQlite database'))
 parser.add_argument('--conf', '-c', default='config.yaml', help='specify config file')
+parser.add_argument('--print', '-p', action='store_true', help='print data which was retrieved (JSON format)')
 
 args = parser.parse_args()
 conf_file = args.conf
@@ -74,7 +75,6 @@ def get_data_from_api(_request_uri: str) -> dict:
             response.raise_for_status()
             if response.status_code // 100 == 2:
                 success = True
-                return response.json()
 
         except requests.exceptions.HTTPError as error:
             print(('API HTTP error ' + str(response.status_code) +
@@ -98,8 +98,8 @@ def get_data_from_api(_request_uri: str) -> dict:
 
         if success:
             print('API request successful, status ' + str(response.status_code) + '.')
-            break
-
+            if args.print: print(response.json())
+            return response.json()
 
 def insert_data(data: dict):
     """Insert our data records one by one, keep track of how many were successfully inserted
