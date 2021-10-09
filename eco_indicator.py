@@ -262,10 +262,14 @@ def update_inky(conf: dict, inky_data: dict, demo: bool):
         min_slot_timedelta = datetime.strptime(
             inky_data[low_slots_start_idx][0],
             "%Y-%m-%d %H:%M:%S") - datetime.strptime(inky_data[0][0], "%Y-%m-%d %H:%M:%S")
-
-        draw.text((x_pos, y_pos), low_slots_start_time + "/" +
-                  str(min_slot_timedelta.total_seconds() / 3600) +
-                  "h    ", inky_display.BLACK, font)
+            
+        if min_slot_timedelta.total_seconds() > 1800:  
+            draw.text((x_pos, y_pos), low_slots_start_time + "/" +
+                      str(min_slot_timedelta.total_seconds() / 3600) +
+                      "h    ", inky_display.BLACK, font)
+        else:
+            font = ImageFont.truetype(RobotoMedium, size=int(16 * font_scale_factor))
+            draw.text((x_pos, y_pos), "NOW!", inky_display.RED, font)
 
         # draw graph outline (last so it's over the top of everything else)
         i = 0
