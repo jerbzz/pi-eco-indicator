@@ -330,12 +330,20 @@ def clear_display(conf: dict):
     """Determine what type of display is connected and
     use the appropriate method to clear it."""
     if conf['DisplayType'] == 'blinkt':
+
+        import blinkt
+
         print('Clearing Blinkt! display...')
         blinkt.clear()
         blinkt.show()
         print('Done.')
 
     elif conf['DisplayType'] == 'inkyphat':
+
+        from inky.auto import auto
+        from inky.eeprom import read_eeprom
+        from PIL import Image
+
         inky_eeprom = read_eeprom()
         if inky_eeprom is None:
             raise SystemExit('Error: Inky pHAT display not found')
