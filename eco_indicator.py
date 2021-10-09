@@ -97,7 +97,6 @@ def update_inky(conf: dict, inky_data: dict, demo: bool):
 
     # deal with scaling for newer SSD1608 pHATs
     if inky_display.resolution == (250, 122):
-        graph_y_unit = 1.2
         graph_x_unit = 4 # needs to be int to avoid aliasing
         font_scale_factor = 1.2
         x_padding_factor = 1.25
@@ -105,7 +104,6 @@ def update_inky(conf: dict, inky_data: dict, demo: bool):
 
     # original Inky pHAT
     if inky_display.resolution == (212, 104):
-        graph_y_unit = 1
         graph_x_unit = 3 # needs to be int to avoid aliasing
         font_scale_factor = 1
         x_padding_factor = 1
@@ -117,7 +115,6 @@ def update_inky(conf: dict, inky_data: dict, demo: bool):
         descriptor = "Carbon at "
         high_value = conf['InkyPHAT']['HighIntensity']
         format_str = "{:.0f}"
-        graph_y_unit = graph_y_unit / 7
 
     if conf['Mode'] == "agile_price":
         tuple_idx = 1
@@ -154,7 +151,10 @@ def update_inky(conf: dict, inky_data: dict, demo: bool):
 
         print("Lowest value slot: " + min_slot_value + short_unit + " at " + min_slot_time + ".")
 
-        # figure out the cheapest slot
+        # scale the y-axis
+        max_slot = max(inky_data, key=lambda inky_data: inky_data[tuple_idx])
+        max_slot_value = max_slot[tuple_idx]
+        graph_y_unit = (inky_display.HEIGHT / 2.5) / max_slot_value
 
         # draw graph solid bars...
         # shift axis for negative prices
