@@ -432,9 +432,9 @@ def get_config(filename: str) -> dict:
     elif _config['Mode'] == 'carbon':
         print('Working in carbon intensity mode.')
     else:
-        raise SystemExit('Error: Unknown mode found in ' +  + filename + ': ' + _config['Mode'])
+        raise SystemExit('Error: Unknown mode found in ' + filename + ': ' + _config['Mode'])
 
     if 'DNORegion' not in _config:
-        raise SystemExit('Error: DNORegion not found in '  + filename)
+        raise SystemExit('Error: DNORegion not found in ' + filename)
 
     return _config
