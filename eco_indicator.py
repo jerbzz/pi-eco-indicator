@@ -101,6 +101,7 @@ def update_inky(conf: dict, inky_data: dict, demo: bool):
         font_scale_factor = 1.2
         x_padding_factor = 1.25
         y_padding_factor = 1.25
+        graph_y_scale_factor = 2.8
 
     # original Inky pHAT
     if inky_display.resolution == (212, 104):
@@ -108,6 +109,7 @@ def update_inky(conf: dict, inky_data: dict, demo: bool):
         font_scale_factor = 1
         x_padding_factor = 1
         y_padding_factor = 1
+        graph_y_scale_factor = 2.5
 
     if conf['Mode'] == "carbon":
         tuple_idx = 2
@@ -154,7 +156,7 @@ def update_inky(conf: dict, inky_data: dict, demo: bool):
         # scale the y-axis
         max_slot = max(inky_data, key=lambda inky_data: inky_data[tuple_idx])
         max_slot_value = max_slot[tuple_idx]
-        graph_y_unit = (inky_display.HEIGHT / 2.5) / max_slot_value
+        graph_y_unit = (inky_display.HEIGHT / graph_y_scale_factor) / max_slot_value
 
         # draw graph solid bars...
         # shift axis for negative prices
