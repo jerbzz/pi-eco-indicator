@@ -10,6 +10,7 @@ DEFAULT_BRIGHTNESS = 10
 # Inky pHAT defaults
 DEFAULT_HIGHPRICE = 15.0
 DEFAULT_LOWSLOTDURATION = 3
+DEFAULT_DATADURATION = 24
 
 def update_blinkt(conf: dict, blinkt_data: dict, demo: bool):
     """Recieve a parsed configuration file and price data from the database,
@@ -97,17 +98,20 @@ def update_inky(conf: dict, inky_data: dict, demo: bool):
 
     # deal with scaling for newer SSD1608 pHATs
     if inky_display.resolution == (250, 122):
-        graph_x_unit = 4 # needs to be int to avoid aliasing
         font_scale_factor = 1.2
-        x_padding_factor = 1.25
-        y_padding_factor = 1.25
+        x_scale_factor = 1.25
+        y_scale_factor = 1.25
+        graph_x_width = 126 * x_scale_factor
 
     # original Inky pHAT
     if inky_display.resolution == (212, 104):
-        graph_x_unit = 3 # needs to be int to avoid aliasing
         font_scale_factor = 1
-        x_padding_factor = 1
-        y_padding_factor = 1
+        x_scale_factor = 1
+        y_scale_factor = 1
+        graph_x_width = 126 * x_scale_factor
+
+    data_duration = conf['InkyPHAT']['DataDuration']
+    graph_x_unit = graph_x_width / (data_duration * 2) # half hour slots!
 
     if conf['Mode'] == "carbon":
         tuple_idx = 2
@@ -132,7 +136,7 @@ def update_inky(conf: dict, inky_data: dict, demo: bool):
         num_low_slots = int(2 * low_slot_duration)
         inky_data_only = [slot_data[tuple_idx] for slot_data in inky_data]
         low_slots_list = []
-        for i in range(0, len(inky_data_only) - num_low_slots - 1):
+        for i in range(0, (data_duration * 2) - num_low_slots - 1):
             low_slots_list.append(sum(inky_data_only[i:i+num_low_slots])/num_low_slots)
         low_slots_start_idx = low_slots_list.index(min(low_slots_list))
         low_slots_average = format_str.format(min(low_slots_list))
@@ -160,15 +164,15 @@ def update_inky(conf: dict, inky_data: dict, demo: bool):
         # shift axis for negative prices
         if min_slot[tuple_idx] < 0:
             graph_bottom = (inky_display.HEIGHT + min_slot[1]
-                            * graph_y_unit) - 13 * y_padding_factor
+                            * graph_y_unit) - 13 * y_scale_factor
         else:
-            graph_bottom = inky_display.HEIGHT - 13 * y_padding_factor
+            graph_bottom = inky_display.HEIGHT - 13 * y_scale_factor
 
         i = 0
         for slot_data in inky_data:
             # draw the lowest slots in black and the highest in red/yellow
 
-            if (i + 1) * graph_x_unit > 127 * x_padding_factor:
+            if (i + 1) * graph_x_unit > 127 * x_scale_factor:
                 break # don't scribble on the small text
 
             if low_slots_start_idx <= i < low_slots_start_idx + num_low_slots:
@@ -190,8 +194,8 @@ def update_inky(conf: dict, inky_data: dict, demo: bool):
         # also highlight display with a coloured border if current price is high
         font = ImageFont.truetype(RobotoBlack, size=int(45 * font_scale_factor))
         message = format_str.format(inky_data[0][tuple_idx]) + short_unit
-        x_pos = 4 * x_padding_factor
-        y_pos = 8 * y_padding_factor
+        x_pos = 4 * x_scale_factor
+        y_pos = 8 * y_scale_factor
 
         slot_start = str(datetime.strftime(pytz.utc.localize(datetime.strptime(
             inky_data[0][0], "%Y-%m-%d %H:%M:%S"), is_dst=None).astimezone(
@@ -209,8 +213,8 @@ def update_inky(conf: dict, inky_data: dict, demo: bool):
         # draw time info above current price...
         font = ImageFont.truetype(RobotoMedium, size=int(15 * font_scale_factor))
         message = descriptor + slot_start + "    " # trailing spaces prevent text clipping
-        x_pos = 4 * x_padding_factor
-        y_pos = 0 * y_padding_factor
+        x_pos = 4 * x_scale_factor
+        y_pos = 0 * y_scale_factor
         draw.text((x_pos, y_pos), message, inky_display.BLACK, font)
 
         mins_until_next_slot = ceil((pytz.utc.localize(datetime.strptime(
@@ -221,32 +225,32 @@ def update_inky(conf: dict, inky_data: dict, demo: bool):
 
         # draw next 3 slot times...
         font = ImageFont.truetype(RobotoMedium, size=int(15 * font_scale_factor))
-        x_pos = 130 * x_padding_factor
+        x_pos = 130 * x_scale_factor
         for i in range(3):
             message = "+" + str(mins_until_next_slot + (i * 30)) + ":    "
             # trailing spaces prevent text clipping
-            y_pos = i * 18 * y_padding_factor + 3 * y_padding_factor
+            y_pos = i * 18 * y_scale_factor + 3 * y_scale_factor
             draw.text((x_pos, y_pos), message, inky_display.BLACK, font)
 
         # draw next 3 slot prices...
-        x_pos = 163 * x_padding_factor
+        x_pos = 163 * x_scale_factor
         for i in range(3):
             message = format_str.format(inky_data[i+1][tuple_idx]) + short_unit + "    "
             # trailing spaces prevent text clipping
-            y_pos = i * 18 * y_padding_factor + 3 * y_padding_factor
+            y_pos = i * 18 * y_scale_factor + 3 * y_scale_factor
             if inky_data[i+1][tuple_idx] > high_value:
                 draw.text((x_pos, y_pos), message, inky_display.RED, font)
             else:
                 draw.text((x_pos, y_pos), message, inky_display.BLACK, font)
 
         # draw separator line...
-        ypos = 5 * y_padding_factor + (3 * 18 * y_padding_factor)
-        draw.line((130 * x_padding_factor, ypos, inky_display.WIDTH - 5, ypos),
+        ypos = 5 * y_scale_factor + (3 * 18 * y_scale_factor)
+        draw.line((130 * x_scale_factor, ypos, inky_display.WIDTH - 5, ypos),
                   fill=inky_display.BLACK, width=2)
 
         # draw lowest slots info...
-        x_pos = 130 * x_padding_factor
-        y_pos = 10 * y_padding_factor + (3 * 18 * y_padding_factor)
+        x_pos = 130 * x_scale_factor
+        y_pos = 10 * y_scale_factor + (3 * 18 * y_scale_factor)
         font = ImageFont.truetype(RobotoMedium, size=int(13 * font_scale_factor))
 
         if '.' in str(low_slot_duration):
@@ -257,7 +261,7 @@ def update_inky(conf: dict, inky_data: dict, demo: bool):
         draw.text((x_pos, y_pos), lsd_text + "h @" + low_slots_average + short_unit + "    ",
                   inky_display.BLACK, font)
 
-        y_pos = 16 * (y_padding_factor * 0.6) + (4 * 18 * y_padding_factor)
+        y_pos = 16 * (y_scale_factor * 0.6) + (4 * 18 * y_scale_factor)
 
         min_slot_timedelta = datetime.strptime(
             inky_data[low_slots_start_idx][0],
@@ -278,7 +282,7 @@ def update_inky(conf: dict, inky_data: dict, demo: bool):
             bar_y_height = slot_data[tuple_idx] * graph_y_unit
             prev_bar_y_height = inky_data[i-1][tuple_idx] * graph_y_unit
 
-            if (i + 1) * graph_x_unit > 127 * x_padding_factor: # don't scribble on the small text
+            if (i + 1) * graph_x_unit > 127 * x_scale_factor: # don't scribble on the small text
                 break
 
             # horizontal lines...
@@ -295,21 +299,21 @@ def update_inky(conf: dict, inky_data: dict, demo: bool):
             i += 1
 
         # draw graph x axis
-        draw.line((0, graph_bottom, 126 * x_padding_factor, graph_bottom), inky_display.BLACK)
+        draw.line((0, graph_bottom, 126 * x_scale_factor, graph_bottom), inky_display.BLACK)
 
-        # draw graph hour marker text...
-        for i in range(2, 24, 3):
+        # draw graph hour marker text... XXX FIXME XXX
+        for i in range(2, data_duration, ceil(data_duration / 8)):
             colour = inky_display.BLACK
             font = ImageFont.truetype(RobotoMedium, size=int(10 * font_scale_factor))
             x_pos = i * graph_x_unit * 2 # it's half hour slots!!
             hours = datetime.strftime(datetime.now() + timedelta(hours=i), "%H")
             hours_w, hours_h = font.getsize(hours) # we want to centre the labels
             y_pos = graph_bottom + 1
-            if x_pos + hours_w / 2 > 128 * x_padding_factor:
+            if x_pos + hours_w / 2 > 128 * x_scale_factor:
                 break # don't draw past the end of the x axis
             draw.text((x_pos - hours_w / 2, y_pos + 1), hours + "  ", inky_display.BLACK, font)
             # and the tick marks for each one
-            draw.line((x_pos, y_pos + 2 * y_padding_factor, x_pos, graph_bottom),
+            draw.line((x_pos, y_pos + 2 * y_scale_factor, x_pos, graph_bottom),
                       inky_display.BLACK)
 
         # draw average line...
@@ -322,7 +326,7 @@ def update_inky(conf: dict, inky_data: dict, demo: bool):
 
         average_line_ypos = graph_bottom - average_slot_data * graph_y_unit
 
-        for x_pos in range(0, int(126 * x_padding_factor)):
+        for x_pos in range(0, int(126 * x_scale_factor)):
             if x_pos % 6 == 2: # repeat every 6 pixels starting at 2
                 draw.line((x_pos, average_line_ypos, x_pos + 2, average_line_ypos),
                           inky_display.BLACK)
@@ -425,6 +429,14 @@ def get_config(filename: str) -> dict:
                   ' (must be between 0.5 and 6 hours in half hour increments).' +
                   ' Using default of ' + str(DEFAULT_LOWSLOTDURATION) + '.')
             _config['InkyPHAT']['LowSlotDuration'] = DEFAULT_LOWSLOTDURATION
+
+        conf_dataduration = deep_get(_config, ['InkyPHAT', 'DataDuration'])
+        if not (isinstance(conf_dataduration, (int)) and 12 <= conf_highprice <= 48):
+            print('Data duration misconfigured: ' + str(conf_dataduration) +
+                  ' (must be between 12 and 48 hours).' +
+                  ' Using default of ' + str(DEFAULT_DATADURATION) + '.')
+            _config['InkyPHAT']['DataDuration'] = DEFAULT_DATADURATION
+
     else:
         raise SystemExit('Error: unknown DisplayType ' + _config['DisplayType'] + ' in ' + filename)
 
