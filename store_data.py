@@ -25,23 +25,27 @@ AGILE_REGIONS = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'P', 'N', 'J', 'H', 'K', 'L'
 
 AGILE_API_TAIL = "/standard-unit-rates/"
 
-CARBON_API_BASE = ('https://api.carbonintensity.org.uk')
+CARBON_API_BASE = 'https://api.carbonintensity.org.uk'
 
-CARBON_REGIONS = {'A': '/regional/intensity/{from_time}/fw48h/regionid/10',
-                  'B': '/regional/intensity/{from_time}/fw48h/regionid/9',
-                  'C': '/regional/intensity/{from_time}/fw48h/regionid/13',
-                  'D': '/regional/intensity/{from_time}/fw48h/regionid/6',
-                  'E': '/regional/intensity/{from_time}/fw48h/regionid/8',
-                  'F': '/regional/intensity/{from_time}/fw48h/regionid/4',
-                  'G': '/regional/intensity/{from_time}/fw48h/regionid/3',
-                  'P': '/regional/intensity/{from_time}/fw48h/regionid/1',
-                  'N': '/regional/intensity/{from_time}/fw48h/regionid/2',
-                  'J': '/regional/intensity/{from_time}/fw48h/regionid/14',
-                  'H': '/regional/intensity/{from_time}/fw48h/regionid/12',
-                  'K': '/regional/intensity/{from_time}/fw48h/regionid/7',
-                  'L': '/regional/intensity/{from_time}/fw48h/regionid/11',
-                  'M': '/regional/intensity/{from_time}/fw48h/regionid/5',
+CARBON_REGIONS = {'A': '/regionid/10',
+                  'B': '/regionid/9',
+                  'C': '/regionid/13',
+                  'D': '/regionid/6',
+                  'E': '/regionid/8',
+                  'F': '/regionid/4',
+                  'G': '/regionid/3',
+                  'P': '/regionid/1',
+                  'N': '/regionid/2',
+                  'J': '/regionid/14',
+                  'H': '/regionid/12',
+                  'K': '/regionid/7',
+                  'L': '/regionid/11',
+                  'M': '/regionid/5',
                   'Z': '/intensity/{from_time}/fw48h'}
+
+CARBON_API_FW = '/regional/intensity/{from_time}/fw48h'
+
+CARBON_API_CURRENT = '/regional'
 
 MAX_RETRIES = 15 # give up once we've tried this many times to get the prices from the API
 
@@ -230,7 +234,12 @@ elif config['Mode'] == 'carbon':
 
     # Build the API for the request - public API so no authentication required
     request_time = datetime.now().astimezone(pytz.utc).isoformat()
-    request_uri = (CARBON_API_BASE + CARBON_REGIONS[DNO_REGION])
+
+    if DNO_REGION == 'Z':
+        request_uri = (CARBON_API_BASE + CARBON_REGIONS[DNO_REGION])
+    else:
+        request_uri = (CARBON_API_BASE + CARBON_API_FW + CARBON_REGIONS[DNO_REGION])
+        
     request_uri = request_uri.format(from_time=request_time)
 
 try:
@@ -254,7 +263,19 @@ except sqlite3.OperationalError:
 
 data_rows = get_data_from_api(request_uri)
 
+print(data_rows)
+
 insert_data(data_rows)
+
+if config['Mode'] == 'carbon':
+    if DNO_REGION == 'Z':
+        request_uri = (CARBON_API_BASE + '/intensity')
+    else:
+        request_uri = (CARBON_API_BASE + CARBON_API_CURRENT + CARBON_REGIONS[DNO_REGION])
+        
+current_data = get_data_from_api(request_uri)
+
+print(current_data)
 
 remove_old_data('2 days')
 
