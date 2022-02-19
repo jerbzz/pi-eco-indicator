@@ -158,7 +158,7 @@ def update_inky(conf: dict, inky_data: dict, demo: bool):
         # scale the y-axis
         max_slot = max(inky_data, key=lambda inky_data: inky_data[tuple_idx])
         max_slot_value = max_slot[tuple_idx]
-        graph_y_unit = (inky_display.HEIGHT / graph_y_scale_factor) / max_slot_value
+        graph_y_unit = (inky_display.HEIGHT / 2.5) / max_slot_value
 
         # draw graph solid bars...
         # shift axis for negative prices
