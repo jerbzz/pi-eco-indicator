@@ -156,7 +156,8 @@ def update_inky(conf: dict, inky_data: dict, demo: bool):
         print("Lowest value slot: " + min_slot_value + short_unit + " at " + min_slot_time + ".")
 
         # scale the y-axis
-        max_slot = max(inky_data, key=lambda inky_data: inky_data[tuple_idx])
+        selected_inky_data = inky_data[:data_duration*2]
+        max_slot = max(selected_inky_data, key=lambda selected_inky_data: selected_inky_data[tuple_idx])
         max_slot_value = max_slot[tuple_idx]
         graph_y_unit = (inky_display.HEIGHT / 2.5) / max_slot_value
 
