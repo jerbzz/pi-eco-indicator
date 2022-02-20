@@ -28,11 +28,14 @@ InkyPHAT:
 
     HighPrice: 25
     # at or above this price, text and graph bars turn red/yellow.
+
     HighIntensity: 200
     # at or above this carbon intensity, text and graph bars turn red/yellow.
+
     LowSlotDuration: 3
     # how long (in hours) the "lowest slot" function should search for.
     # This must be between 0.5 and 6 hours in half hour increments.
+
     DataDuration: 24
     # amount of data to consider for the graph and the stats (in hours)
     # Must between 12 and 48 inclusive.
@@ -43,11 +46,16 @@ Blinkt:
     Brightness: 10
     # min 5, max 100. 100 is *really really bright*.
 
+    SlotsPerPixel: 1
+    # number of half hourly slots to show per Blinkt! pixel. Must be an integer.
+    # If this is greater than 1, the data will be averaged.
+    # Minimum 1, maximum 12. More than 6 does not make much sense for Agile mode.
+
     Colours:
     # Price is only for agile_price mode
     # Carbon is only for carbon mode
     # Price is in p/kWh, Carbon is in g/kWh
-    
+
         Level6:
             Name: Magenta
             Price: 28.0
@@ -55,7 +63,7 @@ Blinkt:
             R: 155
             G: 0
             B: 200
-    
+
         Level5:
             Name: Red
             Price: 17.0

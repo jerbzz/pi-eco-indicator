@@ -6,6 +6,7 @@ import yaml
 
 # Blinkt! defaults
 DEFAULT_BRIGHTNESS = 10
+DEFAULT_SLOTSPERPIXEL = 1
 
 # Inky pHAT defaults
 DEFAULT_HIGHPRICE = 15.0
@@ -33,27 +34,55 @@ def update_blinkt(conf: dict, blinkt_data: dict, demo: bool):
         blinkt.show()
 
     else:
-        blinkt.clear()
-        i = 0
+
+        if conf['Mode'] == "carbon":
+            tuple_idx = 2
+            short_unit = "g"
+            data_name = "Carbon"
+
+        if conf['Mode'] == "agile_price":
+            tuple_idx = 1
+            short_unit = "p"
+            data_name = "Price"
+
+        slots_per_pixel = conf['Blinkt']['SlotsPerPixel']
+
+        print("Displaying " + str(slots_per_pixel) + " slots per Blinkt! pixel.")
+
+        # group data into however many slots we are using per pixel        
+        blinkt_data = [blinkt_data[i:i + slots_per_pixel] for i in range(0, len(blinkt_data), slots_per_pixel)]
+
+        # calculate the mean for the grouped data and replace the group with one list item
+        new_data = []
+
+        for li in blinkt_data:
+            li = [list(t) for t in li]
+            sum = 0
+
+            for t in li:
+                sum = sum + t[tuple_idx]
+
+            mean = sum / len(li)
+
+            li[0][tuple_idx] = round(mean,1)
+
+            new_data.append(tuple(li[0]))
+
+        blinkt_data = new_data
+
         if len(blinkt_data) < 8:
             print('Not enough data to fill the display - we will get dark pixels.')
 
+        blinkt.clear()
+        i = 0
         for row in blinkt_data:
             for level, data in conf['Blinkt']['Colours'].items():
-                if conf['Mode'] == 'agile_price':
-                    slot_data = row[1]
-                    if slot_data >= data['Price']:
-                        print(str(i) + ': ' + str(slot_data) + 'p -> ' + data['Name'])
-                        blinkt.set_pixel(i, data['R'], data['G'], data['B'],
-                                         conf['Blinkt']['Brightness']/100)
-                        break
-                elif conf['Mode'] == 'carbon':
-                    slot_data = row[2]
-                    if slot_data >= data['Carbon']:
-                        print(str(i) + ': ' + str(slot_data) + 'g -> ' + data['Name'])
-                        blinkt.set_pixel(i, data['R'], data['G'], data['B'],
-                                         conf['Blinkt']['Brightness']/100)
-                        break
+                slot_data = row[tuple_idx]
+                if slot_data >= data[data_name]:
+                    print(str(i) + ': ' + str(slot_data) + short_unit + ' -> ' + data['Name'])
+                    blinkt.set_pixel(i, data['R'], data['G'], data['B'],
+                                     conf['Blinkt']['Brightness']/100)
+                    break
             i += 1
             if i == 8:
                 break
@@ -407,11 +436,19 @@ def get_config(filename: str) -> dict:
 
     if _config['DisplayType'] == 'blinkt':
         print('Blinkt! display selected.')
+
         conf_brightness = deep_get(_config, ['Blinkt', 'Brightness'])
         if not (isinstance(conf_brightness, int) and 5 <= conf_brightness <= 100):
             print('Misconfigured brightness value: ' + str(conf_brightness) +
                   '. Using default of ' + str(DEFAULT_BRIGHTNESS) + '.')
             _config['Blinkt']['Brightness'] = DEFAULT_BRIGHTNESS
+
+        conf_slotsperpixel = deep_get(_config, ['Blinkt', 'SlotsPerPixel'])
+        if not (isinstance(conf_slotsperpixel, int) and 1 <= conf_slotsperpixel <= 12):
+            print('Misconfigured slots per pixel value: ' + str(conf_slotsperpixel) +
+                  '. Using default of ' + str(DEFAULT_SLOTSPERPIXEL) + '.')
+            _config['Blinkt']['SlotsPerPixel'] = DEFAULT_SLOTSPERPIXEL
+
         if len(_config['Blinkt']['Colours'].items()) < 2:
             raise SystemExit('Error: Less than two colour levels found in ' + filename)
 
