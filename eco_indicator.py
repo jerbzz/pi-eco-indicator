@@ -63,9 +63,7 @@ def update_blinkt(conf: dict, blinkt_data: dict, demo: bool):
                 sum = sum + t[tuple_idx]
 
             mean = sum / len(li)
-
             li[0][tuple_idx] = round(mean,1)
-
             new_data.append(tuple(li[0]))
 
         blinkt_data = new_data
