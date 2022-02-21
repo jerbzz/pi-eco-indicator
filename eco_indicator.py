@@ -55,16 +55,15 @@ def update_blinkt(conf: dict, blinkt_data: dict, demo: bool):
         # calculate the mean for the grouped data and replace the group with one list item
         new_data = []
 
-        for li in blinkt_data:
-            li = [list(t) for t in li]
-            sum = 0
+        for group in blinkt_data:
 
-            for t in li:
-                sum = sum + t[tuple_idx]
+            total_sum = sum(item[tuple_idx] for item in group)
+            mean = round(total_sum / len(group),1)
 
-            mean = sum / len(li)
-            li[0][tuple_idx] = round(mean,1)
-            new_data.append(tuple(li[0]))
+            first_item = list(group[0])
+            first_item[tuple_idx] = mean
+
+            new_data.append([tuple(first_item)])
 
         blinkt_data = new_data
 
@@ -75,7 +74,7 @@ def update_blinkt(conf: dict, blinkt_data: dict, demo: bool):
         i = 0
         for row in blinkt_data:
             for level, data in conf['Blinkt']['Colours'].items():
-                slot_data = row[tuple_idx]
+                slot_data = row[0][tuple_idx]
                 if slot_data >= data[data_name]:
                     print(str(i) + ': ' + str(slot_data) + short_unit + ' -> ' + data['Name'])
                     blinkt.set_pixel(i, data['R'], data['G'], data['B'],
