@@ -3,7 +3,7 @@ Display upcoming Octopus Agile prices, or carbon intensity from [National Grid](
 
 Should you wish to purchase a preconfigured device, I have an [Etsy shop here](https://www.etsy.com/uk/shop/jerbzz).
 
-Here's the Blinkt! display (in Agile mode for this example, but it reads the same both ways.). Read it from left to right. Each pixel represents a half hour slot, so you get 3.5 to 4 hours of data depending on when you look at it! The leftmost pixel represents the current value. On the half hour, every half hour, everything shifts one pixel to the left.
+Here's the Blinkt! display (in Agile mode for this example, but it reads the same both ways.). Read it from left to right. Each pixel represents between 1 and 12 half-hour slots (configurable), so you get from 4 to 48 hours of data depending on how you configure it! The leftmost pixel represents the current value. On the half hour, every half hour, the data is updated - the best way to think of this is that it all shifts half an hour to the left!
 
 Magenta is the most expensive or most carbon intensive, then red, orange, yellow, green, cyan, and blue. You can change the thresholds and colours easily by editing a configuration file (`config.yaml`).
 
@@ -44,7 +44,7 @@ pip3 install font-roboto
 Once you have installed the Pimoroni software as above, the easiest way to download this software is to copy and paste the following command, which will make a copy of all the files in a folder called **pi-eco-indicator** in your home directory. This won't work unless you've installed the Blinkt! library above (or installed `git` yourself).
 
 ```
-cd ~ && git -c advice.detachedHead=false clone --depth 1 -b v2.1.0 https://github.com/jerbzz/pi-eco-indicator.git
+cd ~ && git -c advice.detachedHead=false clone --depth 1 -b v2.2.0 https://github.com/jerbzz/pi-eco-indicator.git
 ```
 # How to use this code
 
