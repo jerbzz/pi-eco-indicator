@@ -41,18 +41,28 @@ except sqlite3.OperationalError as error:
 config = eco_indicator.get_config(conf_file)
 
 if config['Mode'] == 'agile_price':
-    cursor.execute("SELECT * FROM eco WHERE valid_from > datetime('now', '-30 minutes') AND value_inc_vat IS NOT NULL")
-    data_rows = cursor.fetchall()
+    field_name = 'value_inc_vat'
 
-if config['Mode'] == 'carbon':
-    cursor.execute("SELECT * FROM eco WHERE valid_from > datetime('now', '-30 minutes') AND intensity IS NOT NULL")
-    data_rows = cursor.fetchall()
+elif config['Mode'] == 'carbon':
+    field_name = 'intensity'
+
+else:
+    raise SystemExit('Error: invalid mode ' + config['Mode'] + 'in config.')
+
+cursor.execute("SELECT * FROM eco WHERE valid_from > datetime('now', '-30 minutes') AND " + field_name + " IS NOT NULL")
+data_rows = cursor.fetchall()
+
+if len(data_rows) == 0:
+    raise SystemExit('Error: No data found - perhaps you need to run store_data.py.')
 
 if config['DisplayType'] == 'blinkt':
     eco_indicator.update_blinkt(config, data_rows, args.demo)
 
-if config['DisplayType'] == 'inkyphat':
+elif config['DisplayType'] == 'inkyphat':
     eco_indicator.update_inky(config, data_rows, args.demo)
+
+else:
+    raise SystemExit('Error: invalid display type ' + config['DisplayType'] + 'in config.')
 
 # finish up the database operation
 if conn:
