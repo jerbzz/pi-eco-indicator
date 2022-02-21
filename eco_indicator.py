@@ -162,7 +162,7 @@ def update_inky(conf: dict, inky_data: dict, demo: bool):
         num_low_slots = int(2 * low_slot_duration)
         inky_data_only = [slot_data[tuple_idx] for slot_data in inky_data]
         low_slots_list = []
-        for i in range(0, (data_duration * 2) - num_low_slots - 1):
+        for i in range(0, len(inky_data_only) - num_low_slots - 1):
             low_slots_list.append(sum(inky_data_only[i:i+num_low_slots])/num_low_slots)
         low_slots_start_idx = low_slots_list.index(min(low_slots_list))
         low_slots_average = format_str.format(min(low_slots_list))
