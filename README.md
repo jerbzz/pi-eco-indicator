@@ -21,7 +21,7 @@ The Inky display looks like this in carbon mode, and very similar in Agile mode.
 
 # Software needed
 
-- This has been tested on Raspberry Pi OS Buster only.
+- This has been tested on Raspberry Pi OS Buster and Bullseye, 32-bit only.
 - Establish network access and [enable SSH on the device](https://magpi.raspberrypi.org/articles/ssh-remote-control-raspberry-pi).
 - You will need the Pimoroni Blinkt! Python library, https://github.com/pimoroni/blinkt or the
 - Pimoroni Inky Python library: https://github.com/pimoroni/inky
