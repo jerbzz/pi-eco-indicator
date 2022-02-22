@@ -15,16 +15,14 @@ The Inky display looks like this in carbon mode, and very similar in Agile mode.
 
 # Hardware needed
 
-- Pimoroni Blinkt!, https://shop.pimoroni.com/products/blinkt, or a
-- Pimoroni Inky pHAT, https://shop.pimoroni.com/products/inky-phat
+- [Pimoroni Blinkt!](https://shop.pimoroni.com/products/blinkt), or a [Pimoroni Inky pHAT](https://shop.pimoroni.com/products/inky-phat).
 - A Raspberry Pi of any flavour, as long as you can connect the display to it, and it can connect to the internet. This software has been tested on a Pi Zero W and a Pi 3B+.
 
 # Software needed
 
 - This has been tested on Raspberry Pi OS Buster and Bullseye, 32-bit only.
 - [Establish network access and enable SSH on the device](https://andrejacobs.org/100-days-challenge/setting-up-a-headless-raspberry-pi-zero-w-with-raspberry-pi-os-lite/).
-- You will need the Pimoroni Blinkt! Python library, https://github.com/pimoroni/blinkt or the
-- Pimoroni Inky Python library: https://github.com/pimoroni/inky
+- You will need the [Pimoroni Blinkt! Python library](https://github.com/pimoroni/blinkt), or the [Pimoroni Inky Python library](https://github.com/pimoroni/inky).
 - Install the appropriate library like so, making sure you answer YES to the questions.
 
 ```
