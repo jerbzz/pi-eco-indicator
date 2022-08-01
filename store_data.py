@@ -17,9 +17,13 @@ import requests
 import argparse
 import eco_indicator
 
-AGILE_API_BASE = (
-    'https://api.octopus.energy/v1/products/'
-    'AGILE-18-02-21/electricity-tariffs/E-1R-AGILE-18-02-21-')
+AGILE_API_BASE = ('https://api.octopus.energy/v1/products/')
+
+AGILE_IMPORT_35 = ('AGILE-18-02-21/electricity-tariffs/E-1R-AGILE-18-02-21-')
+
+AGILE_IMPORT_55 = ('AGILE-22-07-22/electricity-tariffs/E-1R-AGILE-22-07-22-')
+
+AGILE_EXPORT = ('AGILE-OUTGOING-19-05-13/electricity-tariffs/E-1R-AGILE-OUTGOING-19-05-13-')
 
 AGILE_REGIONS = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'P', 'N', 'J', 'H', 'K', 'L', 'M']
 
@@ -107,7 +111,7 @@ def insert_data(data: dict):
 
     num_rows_inserted = 0
 
-    if config['Mode'] == 'agile_price':
+    if config['Mode'] == 'agile_import' or 'agile_export':
         for result in data['results']:
             # insert_record returns false if it was a duplicate record
             # or true if a record was successfully entered.
@@ -148,7 +152,7 @@ def insert_record(valid_from: str, data_value: float) -> bool:
     if not cursor:
         raise SystemExit('Database connection lost!')
 
-    if config['Mode'] == 'agile_price':
+    if config['Mode'] == 'agile_import' or 'agile_export':
         # make the date/time work for SQLite, it's picky about the format,
         # easier to use the built in SQLite datetime functions
         # when figuring out what records we want rather than trying to roll our own
@@ -209,16 +213,24 @@ def remove_old_data(age: str):
 os.chdir(os.path.dirname(sys.argv[0]))
 config = eco_indicator.get_config(conf_file)
 
-if config['Mode'] == 'agile_price':
+if config['Mode'] == 'agile_import':
     DNO_REGION = config['DNORegion']
+    AGILE_CAP = config['AgileCap']
 
     if DNO_REGION in AGILE_REGIONS:
         print('Selected region ' + DNO_REGION)
     else:
         raise SystemExit('Error: DNO region ' + DNO_REGION + ' is not a valid choice.')
+        
+    if AGILE_CAP == 35:
+        AGILE_VERSION = AGILE_IMPORT_35
+    elif AGILE_CAP == 55:
+        AGILE_VERSION = AGILE_IMPORT_55
+    else:
+        raise SystemExit('Error: Agile cap of ' + str(AGILE_CAP) + ' refers to an unknown tariff.')
 
     # Build the API for the request - public API so no authentication required
-    request_uri = (AGILE_API_BASE + DNO_REGION + AGILE_API_TAIL)
+    request_uri = (AGILE_API_BASE + AGILE_VERSION + DNO_REGION + AGILE_API_TAIL)
 
 elif config['Mode'] == 'carbon':
     DNO_REGION = config['DNORegion']
@@ -232,6 +244,20 @@ elif config['Mode'] == 'carbon':
     request_time = datetime.now().astimezone(pytz.utc).isoformat()
     request_uri = (CARBON_API_BASE + CARBON_REGIONS[DNO_REGION])
     request_uri = request_uri.format(from_time=request_time)
+
+elif config['Mode'] == 'agile_export':
+    DNO_REGION = config['DNORegion']
+
+    if DNO_REGION in AGILE_REGIONS:
+        print('Selected region ' + DNO_REGION)
+    else:
+        raise SystemExit('Error: DNO region ' + DNO_REGION + ' is not a valid choice.')
+
+    # Build the API for the request - public API so no authentication required
+    request_uri = (AGILE_API_BASE + AGILE_EXPORT + DNO_REGION + AGILE_API_TAIL)
+
+else:
+    raise SystemExit('Error: Invalid mode ' + config['Mode'] + ' passed to store_data.py')
 
 try:
     # connect to the database in rw mode so we can catch the error if it doesn't exist

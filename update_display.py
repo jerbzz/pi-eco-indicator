@@ -40,14 +40,14 @@ except sqlite3.OperationalError as error:
 
 config = eco_indicator.get_config(conf_file)
 
-if config['Mode'] == 'agile_price':
+if config['Mode'] == 'agile_import' or 'agile_export':
     field_name = 'value_inc_vat'
 
 elif config['Mode'] == 'carbon':
     field_name = 'intensity'
 
 else:
-    raise SystemExit('Error: invalid mode ' + config['Mode'] + 'in config.')
+    raise SystemExit('Error: invalid mode ' + config['Mode'] + ' in config.')
 
 cursor.execute("SELECT * FROM eco WHERE valid_from > datetime('now', '-30 minutes') AND " + field_name + " IS NOT NULL")
 data_rows = cursor.fetchall()

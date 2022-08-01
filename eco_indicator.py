@@ -40,10 +40,15 @@ def update_blinkt(conf: dict, blinkt_data: dict, demo: bool):
             short_unit = "g"
             data_name = "Carbon"
 
-        if conf['Mode'] == "agile_price":
+        if conf['Mode'] == "agile_import":
             tuple_idx = 1
             short_unit = "p"
             data_name = "Price"
+
+        if conf['Mode'] == "agile_export":
+            tuple_idx = 1
+            short_unit = "p"
+            data_name = "Export"
 
         slots_per_pixel = conf['Blinkt']['SlotsPerPixel']
 
@@ -146,10 +151,17 @@ def update_inky(conf: dict, inky_data: dict, demo: bool):
         high_value = conf['InkyPHAT']['HighIntensity']
         format_str = "{:.0f}"
 
-    if conf['Mode'] == "agile_price":
+    if conf['Mode'] == "agile_import":
         tuple_idx = 1
         short_unit = "p"
         descriptor = "Price from "
+        high_value = conf['InkyPHAT']['HighPrice']
+        format_str = "{0:.1f}"
+
+    if conf['Mode'] == "agile_export":
+        tuple_idx = 1
+        short_unit = "p"
+        descriptor = "Export at "
         high_value = conf['InkyPHAT']['HighPrice']
         format_str = "{0:.1f}"
 
@@ -478,8 +490,21 @@ def get_config(filename: str) -> dict:
     if _config['Mode'] is None:
         raise SystemExit('Error: Mode not found in ' + filename)
 
-    if _config['Mode'] == 'agile_price':
-        print('Working in Octopus Agile price mode.')
+    if _config['Mode'] == 'agile_import':
+        print('Working in Octopus Agile import mode.')
+        
+        if _config['AgileCap'] is None:
+            raise SystemExit('Error: Agile cap not found in ' + filename)
+
+        if _config['AgileCap'] == 35:
+            print('Agile version set: 35p cap (pre July 2022)')
+        elif _config['AgileCap'] == 55:
+            print('Agile version set: 55p cap (July 2022 onwards)')
+        else:
+            raise SystemExit('Error: Agile cap of ' + str(_config['AgileCap']) + ' refers to an unknown tariff.')
+
+    elif _config['Mode'] == 'agile_export':
+        print('Working in Octopus Agile export mode.')
     elif _config['Mode'] == 'carbon':
         print('Working in carbon intensity mode.')
     else:

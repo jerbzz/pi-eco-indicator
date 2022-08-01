@@ -1,5 +1,15 @@
 ---
-DNORegion: Z
+Mode: agile_export
+# supported modes are "agile_import", "agile_export", or "carbon"
+
+AgileCap: 35
+# 35 or 55
+# 35p cap is AGILE-18-02-21, 55p cap is AGILE-22-07-22
+
+DisplayType: inkyphat
+# supported display types are "blinkt" or "inkyphat".
+
+DNORegion: B
 # Permitted regions are:
 # A = East England
 # B = East Midlands
@@ -16,13 +26,6 @@ DNORegion: Z
 # L = South West England
 # M = Yorkshire
 # Z = National (only valid in carbon mode)
-
-
-Mode: carbon
-# supported modes are "agile_price" or "carbon"
-
-DisplayType: blinkt
-# supported display types are "blinkt" or "inkyphat".
 
 InkyPHAT:
 
@@ -52,7 +55,7 @@ Blinkt:
     # Minimum 1, maximum 12. More than 6 does not make much sense for Agile mode.
 
     Colours:
-    # Price is only for agile_price mode
+    # Price is only for agile modes
     # Carbon is only for carbon mode
     # Price is in p/kWh, Carbon is in g/kWh
 
