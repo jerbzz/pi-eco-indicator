@@ -103,6 +103,9 @@ def update_inky(conf: dict, inky_data: dict, demo: bool):
     format and index [1] is the price in p/kWh as a float. index [2] is
     the carbon intensity as an integer."""
 
+    if demo:
+        raise SystemExit("Demo mode not implemented!")
+
     from math import ceil
     from datetime import datetime, timedelta
     import pytz
@@ -113,6 +116,7 @@ def update_inky(conf: dict, inky_data: dict, demo: bool):
     from inky.eeprom import read_eeprom
 
     inky_eeprom = read_eeprom()
+
     if inky_eeprom is None:
         raise SystemExit('Error: Inky pHAT display not found')
 
@@ -157,6 +161,7 @@ def update_inky(conf: dict, inky_data: dict, demo: bool):
         descriptor = "Price from "
         high_value = conf['InkyPHAT']['HighPrice']
         format_str = "{0:.1f}"
+        
 
     if conf['Mode'] == "agile_export":
         tuple_idx = 1
@@ -164,134 +169,164 @@ def update_inky(conf: dict, inky_data: dict, demo: bool):
         descriptor = "Export at "
         high_value = conf['InkyPHAT']['HighPrice']
         format_str = "{0:.1f}"
+        
+    # figure out highest priced slots
+    high_slot_duration = conf['InkyPHAT']['LowSlotDuration']
+    num_high_slots = int(2 * high_slot_duration)
+    inky_data_only = [slot_data[tuple_idx] for slot_data in inky_data]
+    high_slots_list = []
+    for i in range(0, len(inky_data_only) - num_high_slots - 1):
+        high_slots_list.append(sum(inky_data_only[i:i+num_high_slots])/num_high_slots)
+    high_slots_start_idx = high_slots_list.index(max(high_slots_list))
+    high_slots_average = format_str.format(max(high_slots_list))
 
-    if demo:
-        print("Demo mode... (not implemented!)")
+    high_slots_start_time = str(datetime.strftime(pytz.utc.localize(
+        datetime.strptime(inky_data[high_slots_start_idx][0], "%Y-%m-%d %H:%M:%S"),
+        is_dst=None).astimezone(local_tz), "%H:%M"))
 
+    print("Highest " + str(high_slot_duration) + " hours: average " +
+          high_slots_average + short_unit + "/kWh at " + high_slots_start_time + ".")
+
+    max_slot = max(inky_data, key=lambda inky_data: inky_data[tuple_idx])
+    max_slot_value = str(max_slot[tuple_idx])
+    max_slot_time = str(datetime.strftime(pytz.utc.localize(datetime.strptime(
+        max_slot[0], "%Y-%m-%d %H:%M:%S"), is_dst=None).astimezone(local_tz), "%H:%M"))
+
+    print("Highest value slot: " + max_slot_value + short_unit + " at " + max_slot_time + ".")
+        
+    # figure out cheapest/lowest slots
+    low_slot_duration = conf['InkyPHAT']['LowSlotDuration']
+    num_low_slots = int(2 * low_slot_duration)
+    inky_data_only = [slot_data[tuple_idx] for slot_data in inky_data]
+    low_slots_list = []
+    for i in range(0, len(inky_data_only) - num_low_slots - 1):
+        low_slots_list.append(sum(inky_data_only[i:i+num_low_slots])/num_low_slots)
+    low_slots_start_idx = low_slots_list.index(min(low_slots_list))
+    low_slots_average = format_str.format(min(low_slots_list))
+
+    low_slots_start_time = str(datetime.strftime(pytz.utc.localize(
+        datetime.strptime(inky_data[low_slots_start_idx][0], "%Y-%m-%d %H:%M:%S"),
+        is_dst=None).astimezone(local_tz), "%H:%M"))
+
+    print("Lowest " + str(low_slot_duration) + " hours: average " +
+          low_slots_average + short_unit + "/kWh at " + low_slots_start_time + ".")
+
+    min_slot = min(inky_data, key=lambda inky_data: inky_data[tuple_idx])
+    min_slot_value = str(min_slot[tuple_idx])
+    min_slot_time = str(datetime.strftime(pytz.utc.localize(datetime.strptime(
+        min_slot[0], "%Y-%m-%d %H:%M:%S"), is_dst=None).astimezone(local_tz), "%H:%M"))
+
+    print("Lowest value slot: " + min_slot_value + short_unit + " at " + min_slot_time + ".")
+
+    # draw current price, in colour if it's high...
+    # also highlight display with a coloured border if current price is high
+    font = ImageFont.truetype(RobotoBlack, size=int(45 * font_scale_factor))
+    message = format_str.format(inky_data[0][tuple_idx]) + short_unit
+    x_pos = 4 * x_scale_factor
+    y_pos = 8 * y_scale_factor
+
+    slot_start = str(datetime.strftime(pytz.utc.localize(datetime.strptime(
+        inky_data[0][0], "%Y-%m-%d %H:%M:%S"), is_dst=None).astimezone(
+            local_tz), "%H:%M"))
+
+    if inky_data[0][tuple_idx] > high_value:
+        draw.text((x_pos, y_pos), message, inky_display.RED, font)
+        inky_display.set_border(inky_display.RED)
+        print("Current value from " + slot_start + ": " + message + " (High)")
     else:
-        # figure out cheapest/lowest slots
-        low_slot_duration = conf['InkyPHAT']['LowSlotDuration']
-        num_low_slots = int(2 * low_slot_duration)
-        inky_data_only = [slot_data[tuple_idx] for slot_data in inky_data]
-        low_slots_list = []
-        for i in range(0, len(inky_data_only) - num_low_slots - 1):
-            low_slots_list.append(sum(inky_data_only[i:i+num_low_slots])/num_low_slots)
-        low_slots_start_idx = low_slots_list.index(min(low_slots_list))
-        low_slots_average = format_str.format(min(low_slots_list))
+        draw.text((x_pos, y_pos), message, inky_display.BLACK, font)
+        inky_display.set_border(inky_display.WHITE)
+        print("Current value from " + slot_start + ": " + message)
 
-        low_slots_start_time = str(datetime.strftime(pytz.utc.localize(
-            datetime.strptime(inky_data[low_slots_start_idx][0], "%Y-%m-%d %H:%M:%S"),
-            is_dst=None).astimezone(local_tz), "%H:%M"))
+    # scale the y-axis
+    selected_inky_data = inky_data[:data_duration*2]
+    max_slot = max(selected_inky_data, key=lambda selected_inky_data: selected_inky_data[tuple_idx])
+    max_slot_value = max_slot[tuple_idx]
+    graph_y_unit = (inky_display.HEIGHT / 2.5) / max_slot_value
 
-        print("Lowest " + str(low_slot_duration) + " hours: average " +
-              low_slots_average + short_unit + "/kWh at " + low_slots_start_time + ".")
+    # draw graph solid bars...
+    # shift axis for negative prices
+    if min_slot[tuple_idx] < 0:
+        graph_bottom = (inky_display.HEIGHT + min_slot[1]
+                        * graph_y_unit) - 13 * y_scale_factor
+    else:
+        graph_bottom = inky_display.HEIGHT - 13 * y_scale_factor
 
-        min_slot = min(inky_data, key=lambda inky_data: inky_data[tuple_idx])
-        min_slot_value = str(min_slot[tuple_idx])
-        min_slot_time = str(datetime.strftime(pytz.utc.localize(datetime.strptime(
-            min_slot[0], "%Y-%m-%d %H:%M:%S"), is_dst=None).astimezone(local_tz), "%H:%M"))
+    i = 0
+    for slot_data in inky_data:
+        # draw the lowest slots in black and the highest in red/yellow
 
-        print("Lowest value slot: " + min_slot_value + short_unit + " at " + min_slot_time + ".")
+        if (i + 1) * graph_x_unit > 127 * x_scale_factor:
+            break # don't scribble on the small text
 
-        # scale the y-axis
-        selected_inky_data = inky_data[:data_duration*2]
-        max_slot = max(selected_inky_data, key=lambda selected_inky_data: selected_inky_data[tuple_idx])
-        max_slot_value = max_slot[tuple_idx]
-        graph_y_unit = (inky_display.HEIGHT / 2.5) / max_slot_value
-
-        # draw graph solid bars...
-        # shift axis for negative prices
-        if min_slot[tuple_idx] < 0:
-            graph_bottom = (inky_display.HEIGHT + min_slot[1]
-                            * graph_y_unit) - 13 * y_scale_factor
-        else:
-            graph_bottom = inky_display.HEIGHT - 13 * y_scale_factor
-
-        i = 0
-        for slot_data in inky_data:
-            # draw the lowest slots in black and the highest in red/yellow
-
-            if (i + 1) * graph_x_unit > 127 * x_scale_factor:
-                break # don't scribble on the small text
-
+        if conf['Mode'] == "agile_import":
             if low_slots_start_idx <= i < low_slots_start_idx + num_low_slots:
                 colour = inky_display.BLACK
             elif slot_data[tuple_idx] > high_value:
                 colour = inky_display.RED
             else:
                 colour = inky_display.WHITE
+                
+        if conf['Mode'] == "agile_export":
+            if high_slots_start_idx <= i < high_slots_start_idx + num_high_slots:
+                colour = inky_display.BLACK
+            elif slot_data[tuple_idx] > high_value:
+                colour = inky_display.RED
+            else:
+                colour = inky_display.WHITE
+                
+        bar_y_height = slot_data[tuple_idx] * graph_y_unit
 
-            bar_y_height = slot_data[tuple_idx] * graph_y_unit
+        draw.rectangle(((i + 1) * graph_x_unit, graph_bottom,
+                        (((i + 1) * graph_x_unit) - graph_x_unit),
+                        (graph_bottom - bar_y_height)), colour)
+        i += 1
+    # graph solid bars finished
 
-            draw.rectangle(((i + 1) * graph_x_unit, graph_bottom,
-                            (((i + 1) * graph_x_unit) - graph_x_unit),
-                            (graph_bottom - bar_y_height)), colour)
-            i += 1
-        # graph solid bars finished
+    # draw time info above current price...
+    font = ImageFont.truetype(RobotoMedium, size=int(15 * font_scale_factor))
+    message = descriptor + slot_start + "    " # trailing spaces prevent text clipping
+    x_pos = 4 * x_scale_factor
+    y_pos = 0 * y_scale_factor
+    draw.text((x_pos, y_pos), message, inky_display.BLACK, font)
 
-        # draw current price, in colour if it's high...
-        # also highlight display with a coloured border if current price is high
-        font = ImageFont.truetype(RobotoBlack, size=int(45 * font_scale_factor))
-        message = format_str.format(inky_data[0][tuple_idx]) + short_unit
-        x_pos = 4 * x_scale_factor
-        y_pos = 8 * y_scale_factor
+    mins_until_next_slot = ceil((pytz.utc.localize(datetime.strptime(
+        inky_data[1][0], "%Y-%m-%d %H:%M:%S"), is_dst=None) - datetime.now(
+            pytz.timezone("UTC"))).total_seconds() / 60)
 
-        slot_start = str(datetime.strftime(pytz.utc.localize(datetime.strptime(
-            inky_data[0][0], "%Y-%m-%d %H:%M:%S"), is_dst=None).astimezone(
-                local_tz), "%H:%M"))
+    print(str(mins_until_next_slot) + " mins until next slot.")
 
-        if inky_data[0][tuple_idx] > high_value:
-            draw.text((x_pos, y_pos), message, inky_display.RED, font)
-            inky_display.set_border(inky_display.RED)
-            print("Current value from " + slot_start + ": " + message + " (High)")
-        else:
-            draw.text((x_pos, y_pos), message, inky_display.BLACK, font)
-            inky_display.set_border(inky_display.WHITE)
-            print("Current value from " + slot_start + ": " + message)
-
-        # draw time info above current price...
-        font = ImageFont.truetype(RobotoMedium, size=int(15 * font_scale_factor))
-        message = descriptor + slot_start + "    " # trailing spaces prevent text clipping
-        x_pos = 4 * x_scale_factor
-        y_pos = 0 * y_scale_factor
+    # draw next 3 slot times...
+    font = ImageFont.truetype(RobotoMedium, size=int(15 * font_scale_factor))
+    x_pos = 130 * x_scale_factor
+    for i in range(3):
+        message = "+" + str(mins_until_next_slot + (i * 30)) + ":    "
+        # trailing spaces prevent text clipping
+        y_pos = i * 18 * y_scale_factor + 3 * y_scale_factor
         draw.text((x_pos, y_pos), message, inky_display.BLACK, font)
 
-        mins_until_next_slot = ceil((pytz.utc.localize(datetime.strptime(
-            inky_data[1][0], "%Y-%m-%d %H:%M:%S"), is_dst=None) - datetime.now(
-                pytz.timezone("UTC"))).total_seconds() / 60)
-
-        print(str(mins_until_next_slot) + " mins until next slot.")
-
-        # draw next 3 slot times...
-        font = ImageFont.truetype(RobotoMedium, size=int(15 * font_scale_factor))
-        x_pos = 130 * x_scale_factor
-        for i in range(3):
-            message = "+" + str(mins_until_next_slot + (i * 30)) + ":    "
-            # trailing spaces prevent text clipping
-            y_pos = i * 18 * y_scale_factor + 3 * y_scale_factor
+    # draw next 3 slot prices...
+    x_pos = 163 * x_scale_factor
+    for i in range(3):
+        message = format_str.format(inky_data[i+1][tuple_idx]) + short_unit + "    "
+        # trailing spaces prevent text clipping
+        y_pos = i * 18 * y_scale_factor + 3 * y_scale_factor
+        if inky_data[i+1][tuple_idx] > high_value:
+            draw.text((x_pos, y_pos), message, inky_display.RED, font)
+        else:
             draw.text((x_pos, y_pos), message, inky_display.BLACK, font)
 
-        # draw next 3 slot prices...
-        x_pos = 163 * x_scale_factor
-        for i in range(3):
-            message = format_str.format(inky_data[i+1][tuple_idx]) + short_unit + "    "
-            # trailing spaces prevent text clipping
-            y_pos = i * 18 * y_scale_factor + 3 * y_scale_factor
-            if inky_data[i+1][tuple_idx] > high_value:
-                draw.text((x_pos, y_pos), message, inky_display.RED, font)
-            else:
-                draw.text((x_pos, y_pos), message, inky_display.BLACK, font)
+    # draw separator line...
+    ypos = 5 * y_scale_factor + (3 * 18 * y_scale_factor)
+    draw.line((130 * x_scale_factor, ypos, inky_display.WIDTH - 5, ypos),
+              fill=inky_display.BLACK, width=2)
 
-        # draw separator line...
-        ypos = 5 * y_scale_factor + (3 * 18 * y_scale_factor)
-        draw.line((130 * x_scale_factor, ypos, inky_display.WIDTH - 5, ypos),
-                  fill=inky_display.BLACK, width=2)
+    # draw lowest slots info...
+    x_pos = 130 * x_scale_factor
+    y_pos = 10 * y_scale_factor + (3 * 18 * y_scale_factor)
+    font = ImageFont.truetype(RobotoMedium, size=int(13 * font_scale_factor))
 
-        # draw lowest slots info...
-        x_pos = 130 * x_scale_factor
-        y_pos = 10 * y_scale_factor + (3 * 18 * y_scale_factor)
-        font = ImageFont.truetype(RobotoMedium, size=int(13 * font_scale_factor))
-
+    if conf['Mode'] == "agile_import":
         if '.' in str(low_slot_duration):
             lsd_text = str(low_slot_duration).rstrip('0').rstrip('.')
         else:
@@ -300,12 +335,12 @@ def update_inky(conf: dict, inky_data: dict, demo: bool):
         draw.text((x_pos, y_pos), lsd_text + "h @" + low_slots_average + short_unit + "    ",
                   inky_display.BLACK, font)
 
-        y_pos = 16 * (y_scale_factor * 0.6) + (4 * 18 * y_scale_factor)
-
         min_slot_timedelta = datetime.strptime(
             inky_data[low_slots_start_idx][0],
             "%Y-%m-%d %H:%M:%S") - datetime.strptime(inky_data[0][0], "%Y-%m-%d %H:%M:%S")
             
+        y_pos = 16 * (y_scale_factor * 0.6) + (4 * 18 * y_scale_factor)
+        
         if min_slot_timedelta.total_seconds() > 1800:  
             draw.text((x_pos, y_pos), low_slots_start_time + "/" +
                       str(min_slot_timedelta.total_seconds() / 3600) +
@@ -314,61 +349,91 @@ def update_inky(conf: dict, inky_data: dict, demo: bool):
             font = ImageFont.truetype(RobotoMedium, size=int(16 * font_scale_factor))
             draw.text((x_pos, y_pos), "NOW!", inky_display.RED, font)
 
-        # draw graph outline (last so it's over the top of everything else)
-        i = 0
-        for i, slot_data in enumerate(inky_data):
+    if conf['Mode'] == "agile_export":
+        if '.' in str(high_slot_duration):
+            hsd_text = str(high_slot_duration).rstrip('0').rstrip('.')
+        else:
+            hsd_text = str(high_slot_duration)
+
+        draw.text((x_pos, y_pos), hsd_text + "h @",
+                  inky_display.BLACK, font)
+        
+        if float(high_slots_average) > high_value:
+            colour = inky_display.RED
+        else:
             colour = inky_display.BLACK
-            bar_y_height = slot_data[tuple_idx] * graph_y_unit
-            prev_bar_y_height = inky_data[i-1][tuple_idx] * graph_y_unit
+        draw.text((x_pos + (30 * x_scale_factor), y_pos), high_slots_average + short_unit + "    ",
+                  colour, font)
 
-            if (i + 1) * graph_x_unit > 127 * x_scale_factor: # don't scribble on the small text
-                break
+        max_slot_timedelta = datetime.strptime(
+            inky_data[high_slots_start_idx][0],
+            "%Y-%m-%d %H:%M:%S") - datetime.strptime(inky_data[0][0], "%Y-%m-%d %H:%M:%S")
+            
+        y_pos = 16 * (y_scale_factor * 0.6) + (4 * 18 * y_scale_factor)
+        
+        if max_slot_timedelta.total_seconds() > 1800:  
+            draw.text((x_pos, y_pos), high_slots_start_time + "/" +
+                      str(max_slot_timedelta.total_seconds() / 3600) +
+                      "h    ", inky_display.BLACK, font)
+        else:
+            font = ImageFont.truetype(RobotoMedium, size=int(16 * font_scale_factor))
+            draw.text((x_pos, y_pos), "NOW!", inky_display.RED, font)
 
-            # horizontal lines...
-            draw.line(((i + 1) * graph_x_unit, graph_bottom - bar_y_height,
-                       ((i + 1) * graph_x_unit) - graph_x_unit,
-                       graph_bottom - bar_y_height), colour)
+    # draw graph outline (last so it's over the top of everything else)
+    i = 0
+    for i, slot_data in enumerate(inky_data):
+        colour = inky_display.BLACK
+        bar_y_height = slot_data[tuple_idx] * graph_y_unit
+        prev_bar_y_height = inky_data[i-1][tuple_idx] * graph_y_unit
 
-            # vertical lines...
-            if i == 0: # skip the first vertical line
-                continue
-            draw.line((i * graph_x_unit, graph_bottom - bar_y_height,
-                       i * graph_x_unit, graph_bottom - prev_bar_y_height), colour)
+        if (i + 1) * graph_x_unit > 127 * x_scale_factor: # don't scribble on the small text
+            break
 
-            i += 1
+        # horizontal lines...
+        draw.line(((i + 1) * graph_x_unit, graph_bottom - bar_y_height,
+                   ((i + 1) * graph_x_unit) - graph_x_unit,
+                   graph_bottom - bar_y_height), colour)
 
-        # draw graph x axis
-        draw.line((0, graph_bottom, 126 * x_scale_factor, graph_bottom), inky_display.BLACK)
+        # vertical lines...
+        if i == 0: # skip the first vertical line
+            continue
+        draw.line((i * graph_x_unit, graph_bottom - bar_y_height,
+                   i * graph_x_unit, graph_bottom - prev_bar_y_height), colour)
 
-        # draw graph hour marker text... XXX FIXME XXX
-        for i in range(2, data_duration, ceil(data_duration / 8)):
-            colour = inky_display.BLACK
-            font = ImageFont.truetype(RobotoMedium, size=int(10 * font_scale_factor))
-            x_pos = i * graph_x_unit * 2 # it's half hour slots!!
-            hours = datetime.strftime(datetime.now() + timedelta(hours=i), "%H")
-            hours_w, hours_h = font.getsize(hours) # we want to centre the labels
-            y_pos = graph_bottom + 1
-            if x_pos + hours_w / 2 > 128 * x_scale_factor:
-                break # don't draw past the end of the x axis
-            draw.text((x_pos - hours_w / 2, y_pos + 1), hours + "  ", inky_display.BLACK, font)
-            # and the tick marks for each one
-            draw.line((x_pos, y_pos + 2 * y_scale_factor, x_pos, graph_bottom),
+        i += 1
+
+    # draw graph x axis
+    draw.line((0, graph_bottom, 126 * x_scale_factor, graph_bottom), inky_display.BLACK)
+
+    # draw graph hour marker text... XXX FIXME XXX
+    for i in range(2, data_duration, ceil(data_duration / 8)):
+        colour = inky_display.BLACK
+        font = ImageFont.truetype(RobotoMedium, size=int(10 * font_scale_factor))
+        x_pos = i * graph_x_unit * 2 # it's half hour slots!!
+        hours = datetime.strftime(datetime.now() + timedelta(hours=i), "%H")
+        hours_w, hours_h = font.getsize(hours) # we want to centre the labels
+        y_pos = graph_bottom + 1
+        if x_pos + hours_w / 2 > 128 * x_scale_factor:
+            break # don't draw past the end of the x axis
+        draw.text((x_pos - hours_w / 2, y_pos + 1), hours + "  ", inky_display.BLACK, font)
+        # and the tick marks for each one
+        draw.line((x_pos, y_pos + 2 * y_scale_factor, x_pos, graph_bottom),
+                  inky_display.BLACK)
+
+    # draw average line...
+    # extract just values from the list of tuples and put in descending order
+    slot_data_list = sorted(list(zip(*inky_data))[tuple_idx], reverse=True)
+    # now slice off the first (highest) 6 entries
+    del slot_data_list[:6]
+    # and calculate the mean
+    average_slot_data = sum(slot_data_list) / len(slot_data_list)
+
+    average_line_ypos = graph_bottom - average_slot_data * graph_y_unit
+
+    for x_pos in range(0, int(126 * x_scale_factor)):
+        if x_pos % 6 == 2: # repeat every 6 pixels starting at 2
+            draw.line((x_pos, average_line_ypos, x_pos + 2, average_line_ypos),
                       inky_display.BLACK)
-
-        # draw average line...
-        # extract just values from the list of tuples and put in descending order
-        slot_data_list = sorted(list(zip(*inky_data))[tuple_idx], reverse=True)
-        # now slice off the first (highest) 6 entries
-        del slot_data_list[:6]
-        # and calculate the mean
-        average_slot_data = sum(slot_data_list) / len(slot_data_list)
-
-        average_line_ypos = graph_bottom - average_slot_data * graph_y_unit
-
-        for x_pos in range(0, int(126 * x_scale_factor)):
-            if x_pos % 6 == 2: # repeat every 6 pixels starting at 2
-                draw.line((x_pos, average_line_ypos, x_pos + 2, average_line_ypos),
-                          inky_display.BLACK)
 
     inky_display.set_image(img)
     inky_display.show()

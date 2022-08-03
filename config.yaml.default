@@ -38,9 +38,10 @@ InkyPHAT:
     LowSlotDuration: 3
     # how long (in hours) the "lowest slot" function should search for.
     # This must be between 0.5 and 6 hours in half hour increments.
+    # In Agile Export mode, this searches for the *highest* slots.
 
     DataDuration: 24
-    # amount of data to consider for the graph and the stats (in hours)
+    # amount of data (in hours) to consider for the graph and the stats
     # Must between 12 and 48 inclusive.
     # There will never be much more than 24h of Agile data.
 
