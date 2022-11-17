@@ -3,8 +3,11 @@ Mode: agile_export
 # supported modes are "agile_import", "agile_export", or "carbon"
 
 AgileCap: 35
-# 35 or 55
-# 35p cap is AGILE-18-02-21, 55p cap is AGILE-22-07-22
+# 35, 55, 78, or 100
+# 35p cap is AGILE-18-02-21 (original Agile)
+# 55p cap is AGILE-22-07-22 (July 2022 update)
+# 78p cap is AGILE-22-08-31 (August 2022 update)
+# 100p cap is AGILE-VAR-22-10-19 (new formula, October 2022, quickly withdrawn)
 
 DisplayType: inkyphat
 # supported display types are "blinkt" or "inkyphat".
