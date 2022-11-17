@@ -227,6 +227,10 @@ if config['Mode'] == 'agile_import':
         AGILE_VERSION = AGILE_IMPORT_35
     elif AGILE_CAP == 55:
         AGILE_VERSION = AGILE_IMPORT_55
+    elif AGILE_CAP == 78:
+        AGILE_VERSION = AGILE_IMPORT_78
+    elif AGILE_CAP == 100:
+        AGILE_VERSION = AGILE_IMPORT_VAR_100
     else:
         raise SystemExit('Error: Agile cap of ' + str(AGILE_CAP) + ' refers to an unknown tariff.')
 
