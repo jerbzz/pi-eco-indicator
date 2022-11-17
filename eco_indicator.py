@@ -564,7 +564,11 @@ def get_config(filename: str) -> dict:
         if _config['AgileCap'] == 35:
             print('Agile version set: 35p cap (pre July 2022)')
         elif _config['AgileCap'] == 55:
-            print('Agile version set: 55p cap (July 2022 onwards)')
+            print('Agile version set: 55p cap (July 2022 onwards)')        
+        elif _config['AgileCap'] == 78:
+            print('Agile version set: 78p cap (August 2022 onwards)')        
+        elif _config['AgileCap'] == 100:
+            print('Agile version set: £1 cap, new formula (October 2022 onwards)')
         else:
             raise SystemExit('Error: Agile cap of ' + str(_config['AgileCap']) + ' refers to an unknown tariff.')
 
