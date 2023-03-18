@@ -1,13 +1,14 @@
 ---
-Mode: agile_export
+Mode: agile_import
 # supported modes are "agile_import", "agile_export", or "carbon"
 
-AgileCap: 35
-# 35, 55, 78, or 100
+AgileCap: 101
+# 35, 55, 78, 100, or 101
 # 35p cap is AGILE-18-02-21 (original Agile)
 # 55p cap is AGILE-22-07-22 (July 2022 update)
 # 78p cap is AGILE-22-08-31 (August 2022 update)
 # 100p cap is AGILE-VAR-22-10-19 (new formula, October 2022, quickly withdrawn)
+# "101p" cap is AGILE-FLEX-22-11-25 (current as of March 2023)
 
 DisplayType: inkyphat
 # supported display types are "blinkt" or "inkyphat".
@@ -32,7 +33,7 @@ DNORegion: B
 
 InkyPHAT:
 
-    HighPrice: 25
+    HighPrice: 30
     # at or above this price, text and graph bars turn red/yellow.
 
     HighIntensity: 200
@@ -65,7 +66,7 @@ Blinkt:
 
         Level6:
             Name: Magenta
-            Price: 28.0
+            Price: 40.0
             Carbon: 350
             R: 155
             G: 0
@@ -73,7 +74,7 @@ Blinkt:
 
         Level5:
             Name: Red
-            Price: 17.0
+            Price: 30.0
             Carbon: 300
             R: 255
             G: 0
@@ -81,7 +82,7 @@ Blinkt:
 
         Level4:
             Name: Orange
-            Price: 13.5
+            Price: 25.0
             Carbon: 240
             R: 255
             G: 30
@@ -89,7 +90,7 @@ Blinkt:
 
         Level3:
             Name: Yellow
-            Price: 10.0
+            Price: 20.0
             Carbon: 180
             R: 180
             G: 100
@@ -97,7 +98,7 @@ Blinkt:
 
         Level2:
             Name: Green
-            Price: 5.0
+            Price: 15.0
             Carbon: 120
             R: 0
             G: 255

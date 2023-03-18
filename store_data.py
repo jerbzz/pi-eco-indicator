@@ -23,6 +23,7 @@ AGILE_IMPORT_35 = ('AGILE-18-02-21/electricity-tariffs/E-1R-AGILE-18-02-21-')
 AGILE_IMPORT_55 = ('AGILE-22-07-22/electricity-tariffs/E-1R-AGILE-22-07-22-')
 AGILE_IMPORT_78 = ('AGILE-22-08-31/electricity-tariffs/E-1R-AGILE-22-08-31-')
 AGILE_IMPORT_VAR_100 = ('AGILE-VAR-22-10-19/electricity-tariffs/E-1R-AGILE-VAR-22-10-19-')
+AGILE_IMPORT_FLEX_100 = ('AGILE-FLEX-22-11-25/electricity-tariffs/E-1R-AGILE-FLEX-22-11-25-')
 
 AGILE_EXPORT = ('AGILE-OUTGOING-19-05-13/electricity-tariffs/E-1R-AGILE-OUTGOING-19-05-13-')
 
@@ -222,7 +223,7 @@ if config['Mode'] == 'agile_import':
         print('Selected region ' + DNO_REGION)
     else:
         raise SystemExit('Error: DNO region ' + DNO_REGION + ' is not a valid choice.')
-        
+
     if AGILE_CAP == 35:
         AGILE_VERSION = AGILE_IMPORT_35
     elif AGILE_CAP == 55:
@@ -231,11 +232,14 @@ if config['Mode'] == 'agile_import':
         AGILE_VERSION = AGILE_IMPORT_78
     elif AGILE_CAP == 100:
         AGILE_VERSION = AGILE_IMPORT_VAR_100
+    elif AGILE_CAP == 101:
+        AGILE_VERSION = AGILE_IMPORT_FLEX_100
     else:
         raise SystemExit('Error: Agile cap of ' + str(AGILE_CAP) + ' refers to an unknown tariff.')
 
     # Build the API for the request - public API so no authentication required
     request_uri = (AGILE_API_BASE + AGILE_VERSION + DNO_REGION + AGILE_API_TAIL)
+    # print(request_uri) # debug
 
 elif config['Mode'] == 'carbon':
     DNO_REGION = config['DNORegion']

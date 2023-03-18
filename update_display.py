@@ -15,7 +15,7 @@ import eco_indicator
 DEFAULT_BRIGHTNESS = 10
 
 # Inky pHAT defaults
-DEFAULT_HIGHPRICE = 15.0
+DEFAULT_HIGHPRICE = 30.0
 DEFAULT_LOWSLOTDURATION = 3
 
 parser = argparse.ArgumentParser(description=('Update Eco Indicator display using SQLite data'))
@@ -68,3 +68,4 @@ else:
 if conn:
     conn.commit()
     conn.close()
+

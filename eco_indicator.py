@@ -9,7 +9,7 @@ DEFAULT_BRIGHTNESS = 10
 DEFAULT_SLOTSPERPIXEL = 1
 
 # Inky pHAT defaults
-DEFAULT_HIGHPRICE = 15.0
+DEFAULT_HIGHPRICE = 30.0
 DEFAULT_LOWSLOTDURATION = 3
 DEFAULT_DATADURATION = 24
 
@@ -54,7 +54,7 @@ def update_blinkt(conf: dict, blinkt_data: dict, demo: bool):
 
         print("Displaying " + str(slots_per_pixel) + " slots per Blinkt! pixel.")
 
-        # group data into however many slots we are using per pixel        
+        # group data into however many slots we are using per pixel
         blinkt_data = [blinkt_data[i:i + slots_per_pixel] for i in range(0, len(blinkt_data), slots_per_pixel)]
 
         # calculate the mean for the grouped data and replace the group with one list item
@@ -161,7 +161,7 @@ def update_inky(conf: dict, inky_data: dict, demo: bool):
         descriptor = "Price from "
         high_value = conf['InkyPHAT']['HighPrice']
         format_str = "{0:.1f}"
-        
+
 
     if conf['Mode'] == "agile_export":
         tuple_idx = 1
@@ -169,7 +169,7 @@ def update_inky(conf: dict, inky_data: dict, demo: bool):
         descriptor = "Export at "
         high_value = conf['InkyPHAT']['HighPrice']
         format_str = "{0:.1f}"
-        
+
     # figure out highest priced slots
     high_slot_duration = conf['InkyPHAT']['LowSlotDuration']
     num_high_slots = int(2 * high_slot_duration)
@@ -193,7 +193,7 @@ def update_inky(conf: dict, inky_data: dict, demo: bool):
         max_slot[0], "%Y-%m-%d %H:%M:%S"), is_dst=None).astimezone(local_tz), "%H:%M"))
 
     print("Highest value slot: " + max_slot_value + short_unit + " at " + max_slot_time + ".")
-        
+
     # figure out cheapest/lowest slots
     low_slot_duration = conf['InkyPHAT']['LowSlotDuration']
     num_low_slots = int(2 * low_slot_duration)
@@ -266,7 +266,7 @@ def update_inky(conf: dict, inky_data: dict, demo: bool):
                 colour = inky_display.RED
             else:
                 colour = inky_display.WHITE
-                
+
         if conf['Mode'] == "agile_export":
             if high_slots_start_idx <= i < high_slots_start_idx + num_high_slots:
                 colour = inky_display.BLACK
@@ -274,7 +274,7 @@ def update_inky(conf: dict, inky_data: dict, demo: bool):
                 colour = inky_display.RED
             else:
                 colour = inky_display.WHITE
-                
+
         bar_y_height = slot_data[tuple_idx] * graph_y_unit
 
         draw.rectangle(((i + 1) * graph_x_unit, graph_bottom,
@@ -338,10 +338,10 @@ def update_inky(conf: dict, inky_data: dict, demo: bool):
         min_slot_timedelta = datetime.strptime(
             inky_data[low_slots_start_idx][0],
             "%Y-%m-%d %H:%M:%S") - datetime.strptime(inky_data[0][0], "%Y-%m-%d %H:%M:%S")
-            
+
         y_pos = 16 * (y_scale_factor * 0.6) + (4 * 18 * y_scale_factor)
-        
-        if min_slot_timedelta.total_seconds() > 1800:  
+
+        if min_slot_timedelta.total_seconds() > 1800:
             draw.text((x_pos, y_pos), low_slots_start_time + "/" +
                       str(min_slot_timedelta.total_seconds() / 3600) +
                       "h    ", inky_display.BLACK, font)
@@ -357,7 +357,7 @@ def update_inky(conf: dict, inky_data: dict, demo: bool):
 
         draw.text((x_pos, y_pos), hsd_text + "h @",
                   inky_display.BLACK, font)
-        
+
         if float(high_slots_average) > high_value:
             colour = inky_display.RED
         else:
@@ -368,10 +368,10 @@ def update_inky(conf: dict, inky_data: dict, demo: bool):
         max_slot_timedelta = datetime.strptime(
             inky_data[high_slots_start_idx][0],
             "%Y-%m-%d %H:%M:%S") - datetime.strptime(inky_data[0][0], "%Y-%m-%d %H:%M:%S")
-            
+
         y_pos = 16 * (y_scale_factor * 0.6) + (4 * 18 * y_scale_factor)
-        
-        if max_slot_timedelta.total_seconds() > 1800:  
+
+        if max_slot_timedelta.total_seconds() > 1800:
             draw.text((x_pos, y_pos), high_slots_start_time + "/" +
                       str(max_slot_timedelta.total_seconds() / 3600) +
                       "h    ", inky_display.BLACK, font)
@@ -557,18 +557,20 @@ def get_config(filename: str) -> dict:
 
     if _config['Mode'] == 'agile_import':
         print('Working in Octopus Agile import mode.')
-        
+
         if _config['AgileCap'] is None:
             raise SystemExit('Error: Agile cap not found in ' + filename)
 
         if _config['AgileCap'] == 35:
             print('Agile version set: 35p cap (pre July 2022)')
         elif _config['AgileCap'] == 55:
-            print('Agile version set: 55p cap (July 2022 onwards)')        
+            print('Agile version set: 55p cap (July 2022 onwards)')
         elif _config['AgileCap'] == 78:
-            print('Agile version set: 78p cap (August 2022 onwards)')        
+            print('Agile version set: 78p cap (August 2022 onwards)')
         elif _config['AgileCap'] == 100:
-            print('Agile version set: £1 cap, new formula (October 2022 onwards)')
+            print('Agile version set: £1 cap, new formula (October 2022 only)')
+        elif _config['AgileCap'] == 101:
+            print('Agile version set: £1 cap, new-new formula (current)')
         else:
             raise SystemExit('Error: Agile cap of ' + str(_config['AgileCap']) + ' refers to an unknown tariff.')
 
