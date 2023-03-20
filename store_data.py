@@ -113,7 +113,7 @@ def insert_data(data: dict):
 
     num_rows_inserted = 0
 
-    if config['Mode'] == 'agile_import' or 'agile_export':
+    if config['Mode'] == 'agile_import' or config['Mode'] == 'agile_export':
         for result in data['results']:
             # insert_record returns false if it was a duplicate record
             # or true if a record was successfully entered.
@@ -154,7 +154,7 @@ def insert_record(valid_from: str, data_value: float) -> bool:
     if not cursor:
         raise SystemExit('Database connection lost!')
 
-    if config['Mode'] == 'agile_import' or 'agile_export':
+    if config['Mode'] == 'agile_import' or config['Mode'] == 'agile_export':
         # make the date/time work for SQLite, it's picky about the format,
         # easier to use the built in SQLite datetime functions
         # when figuring out what records we want rather than trying to roll our own
@@ -214,6 +214,11 @@ def remove_old_data(age: str):
 
 os.chdir(os.path.dirname(sys.argv[0]))
 config = eco_indicator.get_config(conf_file)
+
+# print('conf_file: ') # debug
+# print(conf_file) # debug
+# print('config: ') # debug
+# print(config) # debug
 
 if config['Mode'] == 'agile_import':
     DNO_REGION = config['DNORegion']
@@ -288,6 +293,7 @@ except sqlite3.OperationalError:
     print('Database created... ')
 
 data_rows = get_data_from_api(request_uri)
+# print(data_rows) # debug
 
 insert_data(data_rows)
 

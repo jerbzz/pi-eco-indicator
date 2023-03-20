@@ -259,7 +259,7 @@ def update_inky(conf: dict, inky_data: dict, demo: bool):
         if (i + 1) * graph_x_unit > 127 * x_scale_factor:
             break # don't scribble on the small text
 
-        if conf['Mode'] == "agile_import":
+        if conf['Mode'] == "agile_import" or conf['Mode'] == "carbon":
             if low_slots_start_idx <= i < low_slots_start_idx + num_low_slots:
                 colour = inky_display.BLACK
             elif slot_data[tuple_idx] > high_value:
