@@ -1,8 +1,6 @@
 # pi-eco-indicator
 Display upcoming Octopus Agile prices, or carbon intensity from [National Grid](https://carbonintensity.org.uk/) on the Pimoroni Blinkt! display or the Pimoroni Inky pHAT display for Raspberry Pi, with no external dependencies - data is fetched directly from public APIs and stored locally. Designed to be simple to set up and use for people with no coding knowledge. Other displays may be supported in the future.
 
-Should you wish to purchase a preconfigured device, I have an [Etsy shop here](https://www.etsy.com/uk/shop/jerbzz).
-
 Here's the Blinkt! display (in Agile mode for this example, but it reads the same both ways.). Read it from left to right. Each pixel represents between 1 and 12 half-hour slots (configurable), so you get from 4 to 48 hours of data depending on how you configure it! The leftmost pixel represents the current value. On the half hour, every half hour, the data is updated - the best way to think of this is that it all shifts half an hour to the left!
 
 Magenta is the most expensive or most carbon intensive, then red, orange, yellow, green, cyan, and blue. You can change the thresholds and colours easily by editing a configuration file (`config.yaml`).
@@ -21,7 +19,7 @@ The Inky display looks like this in carbon mode, and very similar in Agile mode.
 # Software needed
 
 - This has been tested on Raspberry Pi OS Buster and Bullseye, 32-bit only.
-- [Establish network access and enable SSH on the device](https://andrejacobs.org/100-days-challenge/setting-up-a-headless-raspberry-pi-zero-w-with-raspberry-pi-os-lite/).
+- [Establish network access and enable SSH on the device](https://core-electronics.com.au/guides/raspberry-pi-zerow-headless-wifi-setup/).
 - You will need the [Pimoroni Blinkt! Python library](https://github.com/pimoroni/blinkt), or the [Pimoroni Inky Python library](https://github.com/pimoroni/inky).
 - Install the appropriate library like so, making sure you answer YES to the questions.
 
@@ -42,7 +40,7 @@ pip3 install font-roboto
 Once you have installed the Pimoroni software as above, the easiest way to download this software is to copy and paste the following command, which will make a copy of all the files in a folder called **pi-eco-indicator** in your home directory. This won't work unless you've installed the Blinkt! library above (or installed `git` yourself).
 
 ```
-cd ~ && git -c advice.detachedHead=false clone --depth 1 -b v2.2.0 https://github.com/jerbzz/pi-eco-indicator.git
+cd ~ && git -c advice.detachedHead=false clone --depth 1 -b v2.2.1 https://github.com/jerbzz/pi-eco-indicator.git
 ```
 # How to use this code
 
