@@ -1,9 +1,9 @@
 #!/bin/bash
 
-CONFIG_FILE="config.yaml"
-INSTALL_DIR="/home/pi/pi-eco-indicator"
-PYTHON_BIN="/usr/bin/python3"
-LOG_FILE="$INSTALL_DIR/eco_indicator.log"
+CONFIG_FILE=config.yaml
+INSTALL_DIR=~/pi-eco-indicator
+PYTHON_BIN=/usr/bin/python3
+LOG_FILE=$INSTALL_DIR/eco_indicator.log
 
 function parse_yaml {
     local prefix=$2
@@ -44,7 +44,7 @@ if [ "$CONF_Mode" = "carbon" ]; then
 	(crontab -l 2>/dev/null; echo "*/30 * * * * /bin/sleep $DELAYPLUS; $PYTHON_BIN $INSTALL_DIR/update_display.py > $LOG_FILE 2>&1") | crontab -
 	echo "Done."
 	exit 0
-elif [ "$CONF_Mode" = "agile_price" ]; then
+elif [ "$CONF_Mode" = "agile_import" ] || [ "$CONF_Mode" = "agile_export" ]; then
     MINUTES=$(( 30 + RANDOM % 29 ))
     echo "Installing pi-eco-indicator cron jobs for $CONF_Mode mode..."
     (crontab -l 2>/dev/null; echo "@reboot /bin/sleep 30; $PYTHON_BIN $INSTALL_DIR/store_data.py > $LOG_FILE 2>&1") | crontab -
