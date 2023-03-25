@@ -326,7 +326,7 @@ def update_inky(conf: dict, inky_data: dict, demo: bool):
     y_pos = 10 * y_scale_factor + (3 * 18 * y_scale_factor)
     font = ImageFont.truetype(RobotoMedium, size=int(13 * font_scale_factor))
 
-    if conf['Mode'] == "agile_import":
+    if conf['Mode'] == "agile_import" or conf['Mode'] == "carbon":
         if '.' in str(low_slot_duration):
             lsd_text = str(low_slot_duration).rstrip('0').rstrip('.')
         else:
