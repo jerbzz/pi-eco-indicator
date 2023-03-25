@@ -40,7 +40,7 @@ except sqlite3.OperationalError as error:
 
 config = eco_indicator.get_config(conf_file)
 
-if config['Mode'] == 'agile_import' or 'agile_export':
+if config['Mode'] == 'agile_import' or config['Mode'] == 'agile_export':
     field_name = 'value_inc_vat'
 
 elif config['Mode'] == 'carbon':
