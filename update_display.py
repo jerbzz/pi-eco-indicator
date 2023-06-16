@@ -25,7 +25,7 @@ parser.add_argument('--conf', '-c', default='config.yaml', help='specify config 
 args = parser.parse_args()
 conf_file = args.conf
 
-os.chdir(os.path.dirname(sys.argv[0]))
+os.chdir(sys.path[0])
 
 try:
     # connect to the database in rw mode so we can catch the error if it doesn't exist

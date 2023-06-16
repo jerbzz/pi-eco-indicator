@@ -212,7 +212,7 @@ def remove_old_data(age: str):
     except sqlite3.Error as error:
         print('Failed while trying to remove old data points from database: ', error)
 
-os.chdir(os.path.dirname(sys.argv[0]))
+os.chdir(sys.path[0])
 config = eco_indicator.get_config(conf_file)
 
 # print('conf_file: ') # debug
