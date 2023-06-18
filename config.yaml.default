@@ -13,6 +13,9 @@ AgileCap: 101
 DisplayType: inkyphat
 # supported display types are "blinkt" or "inkyphat".
 
+DisplayOrientation: inverted
+# supported orientations  are "standard" or "inverted".
+
 DNORegion: B
 # Permitted regions are:
 # A = East England
