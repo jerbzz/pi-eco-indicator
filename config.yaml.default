@@ -13,7 +13,7 @@ AgileCap: 101
 DisplayType: inkyphat
 # supported display types are "blinkt" or "inkyphat".
 
-DisplayOrientation: inverted
+DisplayOrientation: standard
 # supported orientations  are "standard" or "inverted".
 
 DNORegion: B
