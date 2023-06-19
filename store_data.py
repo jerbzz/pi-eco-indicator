@@ -10,7 +10,7 @@ import os
 import sys
 import time
 from reprlib import Repr
-from datetime import datetime
+from datetime import datetime, timedelta
 from urllib.request import pathname2url
 import pytz
 import requests
@@ -116,7 +116,7 @@ def insert_data(data: dict):
 
     num_rows_inserted = 0
 
-    if config['Mode'] == 'agile_import' or config['Mode'] == 'agile_export':
+    if config['Mode'] == 'agile_import' or config['Mode'] == 'agile_export' or config['Mode'] == "tracker":
         for result in data['results']:
             # insert_record returns false if it was a duplicate record
             # or true if a record was successfully entered.
@@ -157,7 +157,7 @@ def insert_record(valid_from: str, data_value: float) -> bool:
     if not cursor:
         raise SystemExit('Database connection lost!')
 
-    if config['Mode'] == 'agile_import' or config['Mode'] == 'agile_export':
+    if config['Mode'] == 'agile_import' or config['Mode'] == 'agile_export' or config['Mode'] == "tracker":
         # make the date/time work for SQLite, it's picky about the format,
         # easier to use the built in SQLite datetime functions
         # when figuring out what records we want rather than trying to roll our own
@@ -285,6 +285,14 @@ elif config['Mode'] == 'tracker':
     # Build the API for the request - public API so no authentication required
     request_uri = (AGILE_API_BASE + TRACKER_ELECTRICITY + DNO_REGION + AGILE_API_TAIL)
 
+    period_from = datetime.now() - timedelta(days=1)
+    period_from = period_from.strftime("%Y-%m-%dT%H:%M:%SZ")
+
+    period_to = datetime.now() + timedelta(days=2)
+    period_to = period_to.strftime("%Y-%m-%dT%H:%M:%SZ")
+
+    request_uri = request_uri + "?period_from=" + period_from + "&period_to=" + period_to
+
 else:
     raise SystemExit('Error: Invalid mode ' + config['Mode'] + ' passed to store_data.py')
 
@@ -308,11 +316,11 @@ except sqlite3.OperationalError:
     print('Database created... ')
 
 data_rows = get_data_from_api(request_uri)
-# print(data_rows) # debug
+#print(data_rows) # debug
 
 insert_data(data_rows)
 
-remove_old_data('2 days')
+remove_old_data('3 days')
 
 # finish up the database operation
 if conn:

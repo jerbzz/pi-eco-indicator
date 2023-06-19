@@ -49,7 +49,11 @@ elif config['Mode'] == 'carbon':
 else:
     raise SystemExit('Error: invalid mode ' + config['Mode'] + ' in config.')
 
-cursor.execute("SELECT * FROM eco WHERE valid_from > datetime('now', '-30 minutes') AND " + field_name + " IS NOT NULL")
+if config['Mode'] == "tracker":
+    cursor.execute("SELECT * FROM eco")
+else:
+    cursor.execute("SELECT * FROM eco WHERE valid_from > datetime('now', '-30 minutes') AND " + field_name + " IS NOT NULL")
+
 data_rows = cursor.fetchall()
 
 if len(data_rows) == 0:

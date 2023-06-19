@@ -167,6 +167,9 @@ def update_inky_tracker(conf: dict, inky_data: dict, demo: bool):
 
     elif datedif.days == 0:
         print("We don't have tomorrow's data yet.")
+        tracker_price_today = inky_data[0][1]
+        message = "Tracker price today: {:.2f}p".format(tracker_price_today)
+        print(message)
 
     else:
         raise SystemExit("If we got here, mathematics itself is broken.")
