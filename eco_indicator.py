@@ -435,10 +435,10 @@ def update_inky(conf: dict, inky_data: dict, demo: bool):
             draw.line((x_pos, average_line_ypos, x_pos + 2, average_line_ypos),
                       inky_display.BLACK)
 
-#Flip orientation if option is set
+    # Flip orientation if option is set
     if conf['DisplayOrientation'] == 'inverted':
         img=img.rotate(180)
-    
+
     inky_display.set_image(img)
     inky_display.show()
 
@@ -533,6 +533,16 @@ def get_config(filename: str) -> dict:
     elif _config['DisplayType'] == 'inkyphat':
         print('Inky pHAT display selected.')
 
+        if _config['DisplayOrientation'] is None:
+            _config['DisplayOrientation'] = 'standard'
+            print('Standard display orientation.')
+        elif _config['DisplayOrientation'] == 'standard':
+            print('Standard display orientation.')
+        elif _config['DisplayOrientation'] == 'inverted':
+            print('Inverted display orientation.')
+        else:
+            raise SystemExit('Error: Unknown display orientation found in ' + filename + ': ' + _config['DisplayOrientation'])
+
         conf_highprice = deep_get(_config, ['InkyPHAT', 'HighPrice'])
         if not (isinstance(conf_highprice, (int, float)) and 0 <= conf_highprice <= 35):
             print('Misconfigured high price value: ' + str(conf_highprice) +
@@ -556,13 +566,6 @@ def get_config(filename: str) -> dict:
     else:
         raise SystemExit('Error: unknown DisplayType ' + _config['DisplayType'] + ' in ' + filename)
 
-    if _config['DisplayOrientation'] == 'standard':
-        print('Standard display orientation.')
-    elif _config['DisplayOrientation'] == 'inverted':
-        print('Inverted display orientation.')
-    else:
-        raise SystemExit('Error: Unknown display orientation found in ' + filename + ': ' + _config['DisplayOrientation'])
-    
     if _config['Mode'] is None:
         raise SystemExit('Error: Mode not found in ' + filename)
 
