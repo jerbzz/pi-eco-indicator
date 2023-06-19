@@ -44,6 +44,7 @@ if [ "$CONF_Mode" = "carbon" ]; then
 	(crontab -l 2>/dev/null; echo "*/30 * * * * /bin/sleep $DELAYPLUS; $PYTHON_BIN $INSTALL_DIR/update_display.py > $LOG_FILE 2>&1") | crontab -
 	echo "Done."
 	exit 0
+
 elif [ "$CONF_Mode" = "agile_import" ] || [ "$CONF_Mode" = "agile_export" ]; then
     MINUTES=$(( 30 + RANDOM % 29 ))
     echo "Installing pi-eco-indicator cron jobs for $CONF_Mode mode..."
@@ -55,6 +56,18 @@ elif [ "$CONF_Mode" = "agile_import" ] || [ "$CONF_Mode" = "agile_export" ]; the
     (crontab -l 2>/dev/null; echo "$MINUTES 20 * * * $PYTHON_BIN $INSTALL_DIR/store_data.py > $LOG_FILE 2>&1") | crontab -
     echo "Done."
     exit 0
+
+elif [ "$CONF_Mode" = "tracker" ]; then
+    MINUTES=$(( RANDOM % 58 ))
+    MINUTESPLUS=$(( MINUTES + 1 ))
+    echo "Installing pi-eco-indicator cron jobs for $CONF_Mode mode..."
+    (crontab -l 2>/dev/null; echo "@reboot /bin/sleep 30; $PYTHON_BIN $INSTALL_DIR/store_data.py > $LOG_FILE 2>&1") | crontab -
+    (crontab -l 2>/dev/null; echo "@reboot /bin/sleep 40; $PYTHON_BIN $INSTALL_DIR/update_display.py > $LOG_FILE 2>&1") | crontab -
+    (crontab -l 2>/dev/null; echo "$MINUTES * * * * $PYTHON_BIN $INSTALL_DIR/store_data.py > $LOG_FILE 2>&1") | crontab -
+    (crontab -l 2>/dev/null; echo "$MINUTESPLUS * * * * $PYTHON_BIN $INSTALL_DIR/update_display.py > $LOG_FILE 2>&1") | crontab -
+    echo "Done."
+    exit 0
+
 else
     echo "Unknown mode in $CONFIG_FILE: $CONF_Mode"
     exit 1
