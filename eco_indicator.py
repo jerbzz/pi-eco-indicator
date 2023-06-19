@@ -79,7 +79,7 @@ def update_blinkt(conf: dict, blinkt_data: dict, demo: bool):
         blinkt_data = new_data
 
         if len(blinkt_data) < 8:
-            print('Not enough data to fill the display - we will get dark pixels.')
+            print("Not enough data to fill the display - we will get dark pixels.")
 
         blinkt.clear()
         i = 0
@@ -196,7 +196,7 @@ def update_inky(conf: dict, inky_data: dict, demo: bool):
     inky_eeprom = read_eeprom()
 
     if inky_eeprom is None:
-        raise SystemExit('Error: Inky pHAT display not found')
+        raise SystemExit("Error: Inky pHAT display not found")
 
     local_tz = get_localzone()
 
