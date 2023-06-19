@@ -31,6 +31,9 @@ AGILE_REGIONS = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'P', 'N', 'J', 'H', 'K', 'L'
 
 AGILE_API_TAIL = "/standard-unit-rates/"
 
+TRACKER_ELECTRICITY = 'SILVER-VAR-22-10-21/electricity-tariffs/E-1R-SILVER-VAR-22-10-21-'
+TRACKER_GAS = 'SILVER-VAR-22-10-21/gas-tariffs/G-1R-SILVER-VAR-22-10-21-'
+
 CARBON_API_BASE = ('https://api.carbonintensity.org.uk')
 
 CARBON_REGIONS = {'A': '/regional/intensity/{from_time}/fw48h/regionid/10',
@@ -269,6 +272,18 @@ elif config['Mode'] == 'agile_export':
 
     # Build the API for the request - public API so no authentication required
     request_uri = (AGILE_API_BASE + AGILE_EXPORT + DNO_REGION + AGILE_API_TAIL)
+
+elif config['Mode'] == 'tracker':
+
+    DNO_REGION = config['DNORegion']
+
+    if DNO_REGION in AGILE_REGIONS:
+        print('Selected region ' + DNO_REGION)
+    else:
+        raise SystemExit('Error: DNO region ' + DNO_REGION + ' is not a valid choice.')
+
+    # Build the API for the request - public API so no authentication required
+    request_uri = (AGILE_API_BASE + TRACKER_ELECTRICITY + DNO_REGION + AGILE_API_TAIL)
 
 else:
     raise SystemExit('Error: Invalid mode ' + config['Mode'] + ' passed to store_data.py')

@@ -50,6 +50,12 @@ def update_blinkt(conf: dict, blinkt_data: dict, demo: bool):
             short_unit = "p"
             data_name = "Export"
 
+        if conf['Mode'] == "tracker":
+            tuple_idx = 1
+            short_unit = "p"
+            data_name = "Tracker"
+            raise SystemExit("Tracker not yet implemented on Blinkt!")
+
         slots_per_pixel = conf['Blinkt']['SlotsPerPixel']
 
         print("Displaying " + str(slots_per_pixel) + " slots per Blinkt! pixel.")
@@ -92,6 +98,78 @@ def update_blinkt(conf: dict, blinkt_data: dict, demo: bool):
         print("Setting display...")
         blinkt.set_clear_on_exit(False)
         blinkt.show()
+
+def update_inky_tracker(conf: dict, inky_data: dict, demo: bool):
+    """Recieve a parsed configuration file and price/carbon data from the database,
+    as well as a flag indicating demo mode, and then update the Inky
+    display appropriately.
+
+    Notes: list 'inky_data' as passed from update_display.py is an ordered
+    list of tuples. In each tuple, index [0] is the time in SQLite date
+    format and index [1] is the price in p/kWh as a float."""
+
+    from datetime import datetime
+    from datetime import timedelta
+    from PIL import Image, ImageFont, ImageDraw
+    from font_roboto import RobotoMedium, RobotoBlack
+    from inky.auto import auto
+    from inky.eeprom import read_eeprom
+
+    if demo:
+        raise SystemExit("Demo mode not implemented!")
+
+    inky_eeprom = read_eeprom()
+
+    if inky_eeprom is None:
+        raise SystemExit("Error: Inky pHAT display not found")
+
+    try:
+        # detect display type automatically
+        inky_display = auto(ask_user=False, verbose=True)
+    except TypeError as inky_version:
+        raise TypeError("You need to update the Inky library to >= v1.1.0") from inky_version
+
+    img = Image.new("P", (inky_display.WIDTH, inky_display.HEIGHT))
+    draw = ImageDraw.Draw(img)
+
+    # deal with scaling for newer SSD1608 pHATs
+    if inky_display.resolution == (250, 122):
+        font_scale_factor = 1.2
+        x_scale_factor = 1.25
+        y_scale_factor = 1.25
+
+    # original Inky pHAT
+    if inky_display.resolution == (212, 104):
+        font_scale_factor = 1
+        x_scale_factor = 1
+        y_scale_factor = 1
+
+    today = datetime.now().date()
+    tracker_latest_date = datetime.strptime(inky_data[0][0], "%Y-%m-%d %H:%M:%S") + timedelta(hours = 12)
+    tracker_latest_date = tracker_latest_date.date()
+    datedif = tracker_latest_date - today
+
+    print("Today is " + today.strftime("%a %-d %b %Y"))
+    print("Latest tracker data is for " + tracker_latest_date.strftime("%a %-d %b %Y"))
+
+    print("Date difference: " + str(datedif.days))
+
+    if datedif.days > 1 or datedif.days < 0:
+        raise SystemExit("Error: impossible date difference of " + str(datedif) + " days!")
+
+    elif datedif.days == 1:
+        print("We have tomorrow's data.")
+        tracker_price_tomorrow = inky_data[0][1]
+        tracker_price_today = inky_data[1][1]
+        message = "Tracker price today: {:.2f}p, and tomorrow: {:.2f}p".format(
+                  tracker_price_today, tracker_price_tomorrow)
+        print(message)
+
+    elif datedif.days == 0:
+        print("We don't have tomorrow's data yet.")
+
+    else:
+        raise SystemExit("If we got here, mathematics itself is broken.")
 
 def update_inky(conf: dict, inky_data: dict, demo: bool):
     """Recieve a parsed configuration file and price/carbon data from the database,
@@ -578,6 +656,8 @@ def get_config(filename: str) -> dict:
         print('Working in Octopus Agile export mode.')
     elif _config['Mode'] == 'carbon':
         print('Working in carbon intensity mode.')
+    elif _config['Mode'] == 'tracker':
+        print('Working in Octopus Tracker mode.')
     else:
         raise SystemExit('Error: Unknown mode found in ' + filename + ': ' + _config['Mode'])
 

@@ -40,7 +40,7 @@ except sqlite3.OperationalError as error:
 
 config = eco_indicator.get_config(conf_file)
 
-if config['Mode'] == 'agile_import' or config['Mode'] == 'agile_export':
+if config['Mode'] == 'agile_import' or config['Mode'] == 'agile_export' or config['Mode'] == 'tracker':
     field_name = 'value_inc_vat'
 
 elif config['Mode'] == 'carbon':
@@ -59,7 +59,10 @@ if config['DisplayType'] == 'blinkt':
     eco_indicator.update_blinkt(config, data_rows, args.demo)
 
 elif config['DisplayType'] == 'inkyphat':
-    eco_indicator.update_inky(config, data_rows, args.demo)
+    if 'agile' in config['Mode']:
+        eco_indicator.update_inky(config, data_rows, args.demo)
+    elif config['Mode'] == 'tracker':
+        eco_indicator.update_inky_tracker(config, data_rows, args.demo)
 
 else:
     raise SystemExit('Error: invalid display type ' + config['DisplayType'] + 'in config.')
