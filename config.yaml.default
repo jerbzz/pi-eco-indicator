@@ -13,6 +13,10 @@ AgileCap: 101
 DisplayType: inkyphat
 # supported display types are "blinkt" or "inkyphat".
 
+DisplayOrientation: standard
+# supported orientations are "standard" or "inverted". Only relevant for Inky pHat.
+# "Standard" means with the Inky pHat connector at the top and ribbon on the right.
+
 DNORegion: B
 # Permitted regions are:
 # A = East England
