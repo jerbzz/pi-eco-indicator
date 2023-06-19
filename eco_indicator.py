@@ -509,7 +509,7 @@ def get_config(filename: str) -> dict:
     except yaml.YAMLError as config_err:
         raise SystemExit('Error reading configuration: ' + str(config_err)) from config_err
 
-    if _config['DisplayType'] is None:
+    if 'DisplayType' not in _config:
         raise SystemExit('Error: DisplayType not found in ' + filename)
 
     if _config['DisplayType'] == 'blinkt':
@@ -533,7 +533,7 @@ def get_config(filename: str) -> dict:
     elif _config['DisplayType'] == 'inkyphat':
         print('Inky pHAT display selected.')
 
-        if _config['DisplayOrientation'] is None:
+        if 'DisplayOrientation' not in _config:
             _config['DisplayOrientation'] = 'standard'
             print('Standard display orientation.')
         elif _config['DisplayOrientation'] == 'standard':
@@ -566,13 +566,13 @@ def get_config(filename: str) -> dict:
     else:
         raise SystemExit('Error: unknown DisplayType ' + _config['DisplayType'] + ' in ' + filename)
 
-    if _config['Mode'] is None:
+    if 'Mode' not in _config:
         raise SystemExit('Error: Mode not found in ' + filename)
 
     if _config['Mode'] == 'agile_import':
         print('Working in Octopus Agile import mode.')
 
-        if _config['AgileCap'] is None:
+        if 'AgileCap' not in _config:
             raise SystemExit('Error: Agile cap not found in ' + filename)
 
         if _config['AgileCap'] == 35:
