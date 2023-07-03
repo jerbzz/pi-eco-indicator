@@ -223,6 +223,25 @@ config = eco_indicator.get_config(conf_file)
 # print('config: ') # debug
 # print(config) # debug
 
+try:
+    # connect to the database in rw mode so we can catch the error if it doesn't exist
+    DB_URI = 'file:{}?mode=rw'.format(pathname2url('eco_indicator.sqlite'))
+    conn = sqlite3.connect(DB_URI, uri=True)
+    cursor = conn.cursor()
+    print('Connected to database...')
+
+except sqlite3.OperationalError:
+    # handle missing database case
+    print('No database found. Creating a new one...')
+    conn = sqlite3.connect('eco_indicator.sqlite')
+    cursor = conn.cursor()
+    # UNIQUE constraint prevents duplication of data on multiple runs of this script
+    # ON CONFLICT FAIL allows us to count how many times this happens
+    cursor.execute('CREATE TABLE eco (valid_from STRING PRIMARY KEY ON CONFLICT REPLACE, '
+                   'value_inc_vat REAL, intensity REAL)')
+    conn.commit()
+    print('Database created... ')
+
 if config['Mode'] == 'agile_import':
     DNO_REGION = config['DNORegion']
     AGILE_CAP = config['AgileCap']
@@ -247,7 +266,8 @@ if config['Mode'] == 'agile_import':
 
     # Build the API for the request - public API so no authentication required
     request_uri = (AGILE_API_BASE + AGILE_VERSION + DNO_REGION + AGILE_API_TAIL)
-    # print(request_uri) # debug
+    data_rows = get_data_from_api(request_uri)
+    insert_data(data_rows)
 
 elif config['Mode'] == 'carbon':
     DNO_REGION = config['DNORegion']
@@ -261,6 +281,8 @@ elif config['Mode'] == 'carbon':
     request_time = datetime.now().astimezone(pytz.utc).isoformat()
     request_uri = (CARBON_API_BASE + CARBON_REGIONS[DNO_REGION])
     request_uri = request_uri.format(from_time=request_time)
+    data_rows = get_data_from_api(request_uri)
+    insert_data(data_rows)
 
 elif config['Mode'] == 'agile_export':
     DNO_REGION = config['DNORegion']
@@ -272,6 +294,8 @@ elif config['Mode'] == 'agile_export':
 
     # Build the API for the request - public API so no authentication required
     request_uri = (AGILE_API_BASE + AGILE_EXPORT + DNO_REGION + AGILE_API_TAIL)
+    data_rows = get_data_from_api(request_uri)
+    insert_data(data_rows)
 
 elif config['Mode'] == 'tracker':
 
@@ -293,32 +317,11 @@ elif config['Mode'] == 'tracker':
 
     request_uri = request_uri + "?period_from=" + period_from + "&period_to=" + period_to
 
+    data_rows = get_data_from_api(request_uri)
+    insert_data(data_rows)
+
 else:
     raise SystemExit('Error: Invalid mode ' + config['Mode'] + ' passed to store_data.py')
-
-try:
-    # connect to the database in rw mode so we can catch the error if it doesn't exist
-    DB_URI = 'file:{}?mode=rw'.format(pathname2url('eco_indicator.sqlite'))
-    conn = sqlite3.connect(DB_URI, uri=True)
-    cursor = conn.cursor()
-    print('Connected to database...')
-
-except sqlite3.OperationalError:
-    # handle missing database case
-    print('No database found. Creating a new one...')
-    conn = sqlite3.connect('eco_indicator.sqlite')
-    cursor = conn.cursor()
-    # UNIQUE constraint prevents duplication of data on multiple runs of this script
-    # ON CONFLICT FAIL allows us to count how many times this happens
-    cursor.execute('CREATE TABLE eco (valid_from STRING PRIMARY KEY ON CONFLICT REPLACE, '
-                   'value_inc_vat REAL, intensity REAL)')
-    conn.commit()
-    print('Database created... ')
-
-data_rows = get_data_from_api(request_uri)
-#print(data_rows) # debug
-
-insert_data(data_rows)
 
 remove_old_data('3 days')
 
