@@ -110,7 +110,7 @@ def get_data_from_api(_request_uri: str) -> dict:
             if args.print: print(response.json())
             return response.json()
 
-def insert_data(data: dict):
+def insert_data(data: dict, is_gas: bool):
     """Insert our data records one by one, keep track of how many were successfully inserted
     and print the results of the insertion."""
 
@@ -120,7 +120,7 @@ def insert_data(data: dict):
         for result in data['results']:
             # insert_record returns false if it was a duplicate record
             # or true if a record was successfully entered.
-            if insert_record(result['valid_from'], result['value_inc_vat']):
+            if insert_record(result['valid_from'], result['value_inc_vat'], is_gas):
                 num_rows_inserted += 1
 
         if num_rows_inserted > 0:
@@ -135,7 +135,7 @@ def insert_data(data: dict):
         for result in data['results']:
             # insert_record returns false if it was a duplicate record
             # or true if a record was successfully entered.
-            if insert_record(result['valid_from'], result['value_inc_vat']):
+            if insert_record(result['valid_from'], result['value_inc_vat'], is_gas):
                 num_rows_inserted += 1
 
         if num_rows_inserted > 0:
@@ -153,7 +153,7 @@ def insert_data(data: dict):
             carbon_data = data['data']['data']
 
         for result in carbon_data:
-            if insert_record(result['from'], result['intensity']['forecast']):
+            if insert_record(result['from'], result['intensity']['forecast'], is_gas):
                 num_rows_inserted += 1
 
         if num_rows_inserted > 0:
@@ -165,7 +165,7 @@ def insert_data(data: dict):
             print('No values were inserted - maybe we have them'
                   ' already, or carbonintensity.org.uk are late with their update.')
 
-def insert_record(valid_from: str, data_value: float) -> bool:
+def insert_record(valid_from: str, data_value: float, is_gas: bool) -> bool:
     """Assuming we still have a cursor, take a tuple and stick it into the database.
        Return False if it was a duplicate record (not inserted) and True if a record
        was successfully inserted."""
@@ -202,15 +202,26 @@ def insert_record(valid_from: str, data_value: float) -> bool:
         data_tuple = (valid_from_formatted, data_value)
         # print(data_tuple) # debug
 
-        try:
-            cursor.execute(
-                "INSERT INTO 'eco'('valid_from', 'value_inc_vat') VALUES (?, ?) ON CONFLICT(valid_from) DO UPDATE SET value_inc_vat=excluded.value_inc_vat;", data_tuple)
+        if is_gas:
+            try:
+                cursor.execute(
+                    "INSERT INTO 'eco'('valid_from', 'gas_value_inc_vat') VALUES (?, ?) ON CONFLICT(valid_from) DO UPDATE SET gas_value_inc_vat=excluded.gas_value_inc_vat;", data_tuple)
 
-        except sqlite3.Error as error:
-            raise SystemError('Database error: ' + str(error)) from error
+            except sqlite3.Error as error:
+                raise SystemError('Database error: ' + str(error)) from error
 
-        else:
-            return True # the record was inserted
+            else:
+                return True # the record was inserted
+        elif not is_gas:
+            try:
+                cursor.execute(
+                    "INSERT INTO 'eco'('valid_from', 'value_inc_vat') VALUES (?, ?) ON CONFLICT(valid_from) DO UPDATE SET value_inc_vat=excluded.value_inc_vat;", data_tuple)
+
+            except sqlite3.Error as error:
+                raise SystemError('Database error: ' + str(error)) from error
+
+            else:
+                return True # the record was inserted
 
 
     if config['Mode'] == 'carbon':
@@ -274,7 +285,7 @@ except sqlite3.OperationalError:
     # UNIQUE constraint prevents duplication of data on multiple runs of this script
     # ON CONFLICT FAIL allows us to count how many times this happens
     cursor.execute('CREATE TABLE eco (valid_from STRING PRIMARY KEY ON CONFLICT REPLACE, '
-                   'value_inc_vat REAL, intensity REAL)')
+                   'value_inc_vat REAL, intensity REAL, gas_value_inc_vat REAL)')
     conn.commit()
     print('Database created... ')
 
@@ -303,7 +314,7 @@ if config['Mode'] == 'agile_import':
     # Build the API for the request - public API so no authentication required
     request_uri = (AGILE_API_BASE + AGILE_VERSION + DNO_REGION + AGILE_API_TAIL)
     data_rows = get_data_from_api(request_uri)
-    insert_data(data_rows)
+    insert_data(data_rows, False)
 
 elif config['Mode'] == 'carbon':
     DNO_REGION = config['DNORegion']
@@ -318,7 +329,7 @@ elif config['Mode'] == 'carbon':
     request_uri = (CARBON_API_BASE + CARBON_REGIONS[DNO_REGION])
     request_uri = request_uri.format(from_time=request_time)
     data_rows = get_data_from_api(request_uri)
-    insert_data(data_rows)
+    insert_data(data_rows, False)
 
 elif config['Mode'] == 'agile_export':
     DNO_REGION = config['DNORegion']
@@ -331,7 +342,7 @@ elif config['Mode'] == 'agile_export':
     # Build the API for the request - public API so no authentication required
     request_uri = (AGILE_API_BASE + AGILE_EXPORT + DNO_REGION + AGILE_API_TAIL)
     data_rows = get_data_from_api(request_uri)
-    insert_data(data_rows)
+    insert_data(data_rows, False)
 
 elif config['Mode'] == 'tracker':
 
@@ -354,13 +365,13 @@ elif config['Mode'] == 'tracker':
     request_uri = request_uri + "?period_from=" + period_from + "&period_to=" + period_to
 
     data_rows = get_data_from_api(request_uri)
-    insert_data(data_rows)
+    insert_data(data_rows, False)
 
     request_uri = (AGILE_API_BASE + TRACKER_GAS + DNO_REGION + AGILE_API_TAIL)
     request_uri = request_uri + "?period_from=" + period_from + "&period_to=" + period_to
 
     data_rows = get_data_from_api(request_uri)
-    print(data_rows)
+    insert_data(data_rows, True)
 
 else:
     raise SystemExit('Error: Invalid mode ' + config['Mode'] + ' passed to store_data.py')

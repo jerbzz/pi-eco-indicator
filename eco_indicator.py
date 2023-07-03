@@ -106,7 +106,8 @@ def update_inky_tracker(conf: dict, inky_data: dict, demo: bool):
 
     Notes: list 'inky_data' as passed from update_display.py is an ordered
     list of tuples. In each tuple, index [0] is the time in SQLite date
-    format and index [1] is the price in p/kWh as a float."""
+    format, index [1] is the electricity price in p/kWh as a float, index [2]
+    is blank as it would be the carbon intensity, and index [3] is the gas price."""
 
     from datetime import datetime
     from datetime import timedelta
@@ -144,13 +145,15 @@ def update_inky_tracker(conf: dict, inky_data: dict, demo: bool):
         x_scale_factor = 1
         y_scale_factor = 1
 
+    # XXX FIXME Need to handle the case below where we don't have both gas and leccy
+
     today = datetime.now().date()
     tracker_latest_date = datetime.strptime(inky_data[0][0], "%Y-%m-%d %H:%M:%S") + timedelta(hours = 12)
     tracker_latest_date = tracker_latest_date.date()
     datedif = tracker_latest_date - today
 
     print("Today is " + today.strftime("%a %-d %b %Y"))
-    print("Latest tracker data is for " + tracker_latest_date.strftime("%a %-d %b %Y"))
+    print("Latest Tracker data is for " + tracker_latest_date.strftime("%a %-d %b %Y"))
 
     print("Date difference: " + str(datedif.days))
 
@@ -159,16 +162,25 @@ def update_inky_tracker(conf: dict, inky_data: dict, demo: bool):
 
     elif datedif.days == 1:
         print("We have tomorrow's data.")
-        tracker_price_tomorrow = inky_data[0][1]
-        tracker_price_today = inky_data[1][1]
-        message = "Tracker price today: {:.2f}p, and tomorrow: {:.2f}p".format(
-                  tracker_price_today, tracker_price_tomorrow)
+        elec_tracker_price_tomorrow = inky_data[0][1]
+        elec_tracker_price_today = inky_data[1][1]
+        message = "Electricity Tracker price today: {:.2f}p, and tomorrow: {:.2f}p".format(
+                  elec_tracker_price_today, elec_tracker_price_tomorrow)
         print(message)
+        gas_tracker_price_tomorrow = inky_data[0][3]
+        gas_tracker_price_today = inky_data[1][3]
+        message = "Gas Tracker price today: {:.2f}p, and tomorrow: {:.2f}p".format(
+                  gas_tracker_price_today, gas_tracker_price_tomorrow)
+        print(message)
+
 
     elif datedif.days == 0:
         print("We don't have tomorrow's data yet.")
-        tracker_price_today = inky_data[0][1]
-        message = "Tracker price today: {:.2f}p".format(tracker_price_today)
+        elec_tracker_price_today = inky_data[0][1]
+        message = "Electricity Tracker price today: {:.2f}p".format(elec_tracker_price_today)
+        print(message)
+        gas_tracker_price_today = inky_data[0][3]
+        message = "Gas Tracker price today: {:.2f}p".format(gas_tracker_price_today)
         print(message)
 
     else:
