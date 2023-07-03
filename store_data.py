@@ -116,7 +116,22 @@ def insert_data(data: dict):
 
     num_rows_inserted = 0
 
-    if config['Mode'] == 'agile_import' or config['Mode'] == 'agile_export' or config['Mode'] == "tracker":
+    if config['Mode'] == 'agile_import' or config['Mode'] == 'agile_export':
+        for result in data['results']:
+            # insert_record returns false if it was a duplicate record
+            # or true if a record was successfully entered.
+            if insert_record(result['valid_from'], result['value_inc_vat']):
+                num_rows_inserted += 1
+
+        if num_rows_inserted > 0:
+            lastslot = datetime.strftime(datetime.strptime(
+                data['results'][0]['valid_to'], "%Y-%m-%dT%H:%M:%SZ"), "%H:%M on %A %d %b")
+            print(str(num_rows_inserted) + ' prices were inserted, ending at ' + lastslot + '.')
+        else:
+            print('No prices were inserted - maybe we have them'
+                  ' already, or Octopus are late with their update.')
+
+    if config['Mode'] == "tracker":
         for result in data['results']:
             # insert_record returns false if it was a duplicate record
             # or true if a record was successfully entered.
@@ -157,7 +172,7 @@ def insert_record(valid_from: str, data_value: float) -> bool:
     if not cursor:
         raise SystemExit('Database connection lost!')
 
-    if config['Mode'] == 'agile_import' or config['Mode'] == 'agile_export' or config['Mode'] == "tracker":
+    if config['Mode'] == 'agile_import' or config['Mode'] == 'agile_export':
         # make the date/time work for SQLite, it's picky about the format,
         # easier to use the built in SQLite datetime functions
         # when figuring out what records we want rather than trying to roll our own
@@ -176,6 +191,27 @@ def insert_record(valid_from: str, data_value: float) -> bool:
 
         else:
             return True # the record was inserted
+
+    if config['Mode'] == "tracker":
+        # make the date/time work for SQLite, it's picky about the format,
+        # easier to use the built in SQLite datetime functions
+        # when figuring out what records we want rather than trying to roll our own
+        valid_from_formatted = datetime.strftime(
+            datetime.strptime(valid_from, "%Y-%m-%dT%H:%M:%SZ"), "%Y-%m-%d %H:%M:%S")
+
+        data_tuple = (valid_from_formatted, data_value)
+        # print(data_tuple) # debug
+
+        try:
+            cursor.execute(
+                "INSERT INTO 'eco'('valid_from', 'value_inc_vat') VALUES (?, ?) ON CONFLICT(valid_from) DO UPDATE SET value_inc_vat=excluded.value_inc_vat;", data_tuple)
+
+        except sqlite3.Error as error:
+            raise SystemError('Database error: ' + str(error)) from error
+
+        else:
+            return True # the record was inserted
+
 
     if config['Mode'] == 'carbon':
         valid_from_formatted = datetime.strftime(
@@ -319,6 +355,12 @@ elif config['Mode'] == 'tracker':
 
     data_rows = get_data_from_api(request_uri)
     insert_data(data_rows)
+
+    request_uri = (AGILE_API_BASE + TRACKER_GAS + DNO_REGION + AGILE_API_TAIL)
+    request_uri = request_uri + "?period_from=" + period_from + "&period_to=" + period_to
+
+    data_rows = get_data_from_api(request_uri)
+    print(data_rows)
 
 else:
     raise SystemExit('Error: Invalid mode ' + config['Mode'] + ' passed to store_data.py')
