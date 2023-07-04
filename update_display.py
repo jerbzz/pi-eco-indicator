@@ -50,7 +50,7 @@ else:
     raise SystemExit('Error: invalid mode ' + config['Mode'] + ' in config.')
 
 if config['Mode'] == "tracker":
-    cursor.execute("SELECT * FROM eco")
+    cursor.execute("SELECT * FROM eco ORDER BY valid_from DESC")
 else:
     cursor.execute("SELECT * FROM eco WHERE valid_from > datetime('now', '-30 minutes') AND " + field_name + " IS NOT NULL")
 
