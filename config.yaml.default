@@ -1,5 +1,5 @@
 ---
-Mode: tracker
+Mode: carbon
 # supported modes are "agile_import", "agile_export", "tracker" or "carbon"
 
 AgileCap: 101
