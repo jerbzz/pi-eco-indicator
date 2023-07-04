@@ -1,6 +1,6 @@
 ---
-Mode: agile_import
-# supported modes are "agile_import", "agile_export", or "carbon"
+Mode: carbon
+# supported modes are "agile_import", "agile_export", "tracker" or "carbon"
 
 AgileCap: 101
 # 35, 55, 78, 100, or 101
@@ -12,10 +12,6 @@ AgileCap: 101
 
 DisplayType: inkyphat
 # supported display types are "blinkt" or "inkyphat".
-
-DisplayOrientation: standard
-# supported orientations are "standard" or "inverted". Only relevant for Inky pHat.
-# "Standard" means with the Inky pHat connector at the top and ribbon on the right.
 
 DNORegion: B
 # Permitted regions are:
@@ -52,6 +48,10 @@ InkyPHAT:
     # amount of data (in hours) to consider for the graph and the stats
     # Must between 12 and 48 inclusive.
     # There will never be much more than 24h of Agile data.
+
+    DisplayOrientation: standard
+    # supported orientations are "standard" or "inverted". Only relevant for Inky pHat.
+    # "Standard" means with the Inky pHat connector at the top and ribbon on the right.
 
 Blinkt:
 
