@@ -173,7 +173,6 @@ def update_inky_tracker(conf: dict, inky_data: dict, demo: bool):
                   gas_tracker_price_today, gas_tracker_price_tomorrow)
         print(message)
 
-
     elif datedif.days == 0:
         print("We don't have tomorrow's data yet.")
         elec_tracker_price_today = inky_data[0][1]
@@ -185,6 +184,64 @@ def update_inky_tracker(conf: dict, inky_data: dict, demo: bool):
 
     else:
         raise SystemExit("If we got here, mathematics itself is broken.")
+
+    # draw info and today's date
+
+    font = ImageFont.truetype(RobotoMedium, size=int(20 * font_scale_factor))
+    x_pos = 4 * x_scale_factor
+    y_pos = 0 * y_scale_factor
+    draw.text((x_pos, y_pos), "Gas", inky_display.BLACK, font)
+    x_pos = (inky_display.WIDTH) - (40 * x_scale_factor)
+    draw.text((x_pos, y_pos), "Elec", inky_display.BLACK, font)
+
+    font = ImageFont.truetype(RobotoBlack, size=int(15 * font_scale_factor))
+    x_pos = (inky_display.WIDTH / 2) - (30 * x_scale_factor)
+    draw.text((x_pos, y_pos), today.strftime("%a %-d %b"), inky_display.BLACK, font)
+
+    # draw separator line
+
+    x_pos = inky_display.WIDTH / 2
+    draw.line((x_pos, 20 * y_scale_factor, x_pos, inky_display.HEIGHT - 5),
+          fill=inky_display.BLACK, width=2)
+
+    # draw today's prices
+
+    font = ImageFont.truetype(RobotoBlack, size=int(35 * font_scale_factor))
+    x_pos = 4 * x_scale_factor
+    y_pos = 20 * y_scale_factor
+    draw.text((x_pos, y_pos), "{:.1f}p".format(gas_tracker_price_today), inky_display.RED, font)
+    x_pos = inky_display.WIDTH - (95 * x_scale_factor)
+    draw.text((x_pos, y_pos), "{:.1f}p".format(elec_tracker_price_today), inky_display.RED, font)
+
+    font = ImageFont.truetype(RobotoMedium, size=int(15 * font_scale_factor))
+    x_pos = 4 * x_scale_factor
+    y_pos = 60 * y_scale_factor
+    draw.text((x_pos, y_pos), "Tomorrow:", inky_display.BLACK, font)
+    x_pos = inky_display.WIDTH - (95 * x_scale_factor)
+    draw.text((x_pos, y_pos), "Tomorrow:", inky_display.BLACK, font)
+
+    font = ImageFont.truetype(RobotoMedium, size=int(20 * font_scale_factor))
+
+    if datedif.days == 0:
+        x_pos = 4 * x_scale_factor
+        y_pos = 75 * y_scale_factor
+        draw.text((x_pos, y_pos), "No data yet.", inky_display.BLACK, font)
+        x_pos = inky_display.WIDTH - (95 * x_scale_factor)
+        draw.text((x_pos, y_pos), "No data yet.", inky_display.BLACK, font)
+
+    if datedif.days == 1:
+        x_pos = 4 * x_scale_factor
+        y_pos = 75 * y_scale_factor
+        draw.text((x_pos, y_pos), "{:.1f}p".format(gas_tracker_price_tomorrow), inky_display.BLACK, font)
+        x_pos = inky_display.WIDTH - (95 * x_scale_factor)
+        draw.text((x_pos, y_pos), "{:.1f}p".format(elec_tracker_price_tomorrow), inky_display.BLACK, font)
+
+
+    if conf['InkyPHAT']['DisplayOrientation'] == 'inverted':
+        img=img.rotate(180)
+
+    inky_display.set_image(img)
+    inky_display.show()
 
 def update_inky(conf: dict, inky_data: dict, demo: bool):
     """Recieve a parsed configuration file and price/carbon data from the database,
