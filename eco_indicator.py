@@ -145,45 +145,44 @@ def update_inky_tracker(conf: dict, inky_data: dict, demo: bool):
         x_scale_factor = 1
         y_scale_factor = 1
 
-    # XXX FIXME Need to handle the case below where we don't have both gas and leccy
-
     today = datetime.now().date()
+    print("Today is " + today.strftime("%a %-d %b %Y"))
+
     tracker_latest_date = datetime.strptime(inky_data[0][0], "%Y-%m-%d %H:%M:%S") + timedelta(hours = 12)
     tracker_latest_date = tracker_latest_date.date()
     datedif = tracker_latest_date - today
 
-    print("Today is " + today.strftime("%a %-d %b %Y"))
-    print("Latest Tracker data is for " + tracker_latest_date.strftime("%a %-d %b %Y"))
-
-    print("Date difference: " + str(datedif.days))
+    check = 0 # 0 = nothing for tomorrow.
+              # 1 = elec, but no gas
+              # 2 = gas, but no elec
+              # 3 = both gas and elec for tomorrow
 
     if datedif.days > 1 or datedif.days < 0:
         raise SystemExit("Error: impossible date difference of " + str(datedif) + " days!")
 
-    elif datedif.days == 1:
-        print("We have tomorrow's data.")
+    elif datedif.days == 0: # no database entry for today so no data yet at all
+        print("We don't have any data for tomorrow yet.")
+        elec_tracker_price_today = inky_data[0][1]
+        gas_tracker_price_today = inky_data[0][3]
+        check = 0
+
+    elif datedif.days == 1: # there is either gas, electricity, or both.
         elec_tracker_price_tomorrow = inky_data[0][1]
         elec_tracker_price_today = inky_data[1][1]
-        message = "Electricity Tracker price today: {:.2f}p, and tomorrow: {:.2f}p".format(
-                  elec_tracker_price_today, elec_tracker_price_tomorrow)
-        print(message)
         gas_tracker_price_tomorrow = inky_data[0][3]
         gas_tracker_price_today = inky_data[1][3]
-        message = "Gas Tracker price today: {:.2f}p, and tomorrow: {:.2f}p".format(
-                  gas_tracker_price_today, gas_tracker_price_tomorrow)
-        print(message)
 
-    elif datedif.days == 0:
-        print("We don't have tomorrow's data yet.")
-        elec_tracker_price_today = inky_data[0][1]
-        message = "Electricity Tracker price today: {:.2f}p".format(elec_tracker_price_today)
-        print(message)
-        gas_tracker_price_today = inky_data[0][3]
-        message = "Gas Tracker price today: {:.2f}p".format(gas_tracker_price_today)
-        print(message)
+        if isinstance(elec_tracker_price_tomorrow, float):
+            check = check + 1
 
+        if isinstance(gas_tracker_price_tomorrow, float):
+            check = check + 2
+
+        if check == 0:
+            raise SystemExit("Error: we seem to have a database entry for tomorrow"
+                              "but there doesn't seem to be valid data in it.")
     else:
-        raise SystemExit("If we got here, mathematics itself is broken.")
+        raise SystemExit("Epic Fail. If we got here, mathematics itself is broken.")
 
     # draw info and today's date
 
@@ -214,6 +213,10 @@ def update_inky_tracker(conf: dict, inky_data: dict, demo: bool):
     draw.text((x_pos, y_pos), "{:.1f}p".format(gas_tracker_price_today), inky_display.RED, font)
     x_pos = inky_display.WIDTH - (95 * x_scale_factor)
     draw.text((x_pos, y_pos), "{:.1f}p".format(elec_tracker_price_today), inky_display.RED, font)
+    print("Electricity Tracker price today: {:.2f}p".format(elec_tracker_price_today))
+    print("Gas Tracker price today: {:.2f}p".format(gas_tracker_price_today))
+
+    # draw "Tomorrow" labels
 
     font = ImageFont.truetype(RobotoMedium, size=int(15 * font_scale_factor))
     x_pos = 4 * x_scale_factor
@@ -222,23 +225,36 @@ def update_inky_tracker(conf: dict, inky_data: dict, demo: bool):
     x_pos = inky_display.WIDTH - (95 * x_scale_factor)
     draw.text((x_pos, y_pos), "Tomorrow:", inky_display.BLACK, font)
 
+    # draw tomorrow's data or draw a placeholder
+
     font = ImageFont.truetype(RobotoMedium, size=int(20 * font_scale_factor))
 
-    if datedif.days == 1:
+    if check == 1 or check == 3: # we have electricity data for tomorrow
+        x_pos = inky_display.WIDTH - (95 * x_scale_factor)
+        y_pos = 75 * y_scale_factor
+        draw.text((x_pos, y_pos), "{:.1f}p".format(elec_tracker_price_tomorrow), inky_display.BLACK, font)
+        print("Electricity Tracker price tomorrow: {:.2f}p".format(elec_tracker_price_tomorrow))
+
+
+    if check == 2 or check == 3: # we have gas data for tomorrow
         x_pos = 4 * x_scale_factor
         y_pos = 75 * y_scale_factor
         draw.text((x_pos, y_pos), "{:.1f}p".format(gas_tracker_price_tomorrow), inky_display.BLACK, font)
-        x_pos = inky_display.WIDTH - (95 * x_scale_factor)
-        draw.text((x_pos, y_pos), "{:.1f}p".format(elec_tracker_price_tomorrow), inky_display.BLACK, font)
+        print("Gas Tracker price tomorrow: {:.2f}p".format(gas_tracker_price_tomorrow))
 
     font = ImageFont.truetype(RobotoMedium, size=int(15 * font_scale_factor))
 
-    if datedif.days == 0:
+    if check == 0 or check == 1: # we don't have gas data for tomorrow
         x_pos = 4 * x_scale_factor
         y_pos = 75 * y_scale_factor
         draw.text((x_pos, y_pos), "No data yet.", inky_display.BLACK, font)
+        print("No gas data for tomorrow yet.")
+
+    if check == 0 or check == 2: # we don't have electricity data for tomorrow
         x_pos = inky_display.WIDTH - (95 * x_scale_factor)
+        y_pos = 75 * y_scale_factor
         draw.text((x_pos, y_pos), "No data yet.", inky_display.BLACK, font)
+        print("No electricity data for tomorrow yet.")
 
     if conf['InkyPHAT']['DisplayOrientation'] == 'inverted':
         img=img.rotate(180)
