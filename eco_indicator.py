@@ -195,8 +195,10 @@ def update_inky_tracker(conf: dict, inky_data: dict, demo: bool):
     draw.text((x_pos, y_pos), "Elec", inky_display.BLACK, font)
 
     font = ImageFont.truetype(RobotoBlack, size=int(15 * font_scale_factor))
-    x_pos = (inky_display.WIDTH / 2) - (30 * x_scale_factor)
-    draw.text((x_pos, y_pos), today.strftime("%a %-d %b"), inky_display.BLACK, font)
+    date_string = today.strftime("%a %-d %b")
+    width, height = draw.textsize(date_string, font)
+    x_pos = (inky_display.WIDTH / 2) - (width / 2)
+    draw.text((x_pos, y_pos), date_string, inky_display.BLACK, font)
 
     # draw separator line
 
