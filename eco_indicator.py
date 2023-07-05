@@ -222,13 +222,6 @@ def update_inky_tracker(conf: dict, inky_data: dict, demo: bool):
 
     font = ImageFont.truetype(RobotoMedium, size=int(20 * font_scale_factor))
 
-    if datedif.days == 0:
-        x_pos = 4 * x_scale_factor
-        y_pos = 75 * y_scale_factor
-        draw.text((x_pos, y_pos), "No data yet.", inky_display.BLACK, font)
-        x_pos = inky_display.WIDTH - (95 * x_scale_factor)
-        draw.text((x_pos, y_pos), "No data yet.", inky_display.BLACK, font)
-
     if datedif.days == 1:
         x_pos = 4 * x_scale_factor
         y_pos = 75 * y_scale_factor
@@ -236,6 +229,14 @@ def update_inky_tracker(conf: dict, inky_data: dict, demo: bool):
         x_pos = inky_display.WIDTH - (95 * x_scale_factor)
         draw.text((x_pos, y_pos), "{:.1f}p".format(elec_tracker_price_tomorrow), inky_display.BLACK, font)
 
+    font = ImageFont.truetype(RobotoMedium, size=int(15 * font_scale_factor))
+
+    if datedif.days == 0:
+        x_pos = 4 * x_scale_factor
+        y_pos = 75 * y_scale_factor
+        draw.text((x_pos, y_pos), "No data yet.", inky_display.BLACK, font)
+        x_pos = inky_display.WIDTH - (95 * x_scale_factor)
+        draw.text((x_pos, y_pos), "No data yet.", inky_display.BLACK, font)
 
     if conf['InkyPHAT']['DisplayOrientation'] == 'inverted':
         img=img.rotate(180)
