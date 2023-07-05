@@ -684,7 +684,7 @@ def get_config(filename: str) -> dict:
     elif _config['DisplayType'] == 'inkyphat':
         print('Inky pHAT display selected.')
 
-        if 'DisplayOrientation' not in _config:
+        if 'DisplayOrientation' not in _config['InkyPHAT']:
             _config['InkyPHAT']['DisplayOrientation'] = 'standard'
             print('Standard display orientation.')
         elif _config['InkyPHAT']['DisplayOrientation'] == 'standard':
