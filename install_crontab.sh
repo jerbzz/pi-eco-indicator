@@ -2,7 +2,7 @@
 
 CONFIG_FILE=config.yaml
 INSTALL_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
-PYTHON_BIN=/usr/bin/python3
+PYTHON_BIN=`which python3`
 LOG_FILE=$INSTALL_DIR/eco_indicator.log
 
 function parse_yaml {
