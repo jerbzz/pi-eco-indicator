@@ -116,6 +116,24 @@ def update_inky_tracker(conf: dict, inky_data: dict, demo: bool):
     from inky.auto import auto
     from inky.eeprom import read_eeprom
 
+    def price_diff_to_symbol(price_today: float, price_tomorrow: float) -> tuple[str, int]:
+
+        diff = price_tomorrow - price_today
+        change = diff / price_today
+
+        if change == 0:
+            return "( - )", inky_display.BLACK
+        elif 0 < change < 0.1:
+            return "( ^ )", inky_display.BLACK
+        elif change >= 0.1:
+            return "( ^^ )", inky_display.RED
+        elif 0 > change > -0.1:
+            return "( v )", inky_display.BLACK
+        elif change <= -0.1:
+            return "( vv )", inky_display.RED
+        else:
+            return "bork", inky_display.RED
+
     if demo:
         raise SystemExit("Demo mode not implemented!")
 
@@ -227,19 +245,24 @@ def update_inky_tracker(conf: dict, inky_data: dict, demo: bool):
 
     # draw tomorrow's data or draw a placeholder
 
-    font = ImageFont.truetype(RobotoMedium, size=int(20 * font_scale_factor))
-
     if check == 1 or check == 3: # we have electricity data for tomorrow
+        font = ImageFont.truetype(RobotoMedium, size=int(20 * font_scale_factor))
         x_pos = inky_display.WIDTH - (95 * x_scale_factor)
         y_pos = 75 * y_scale_factor
         draw.text((x_pos, y_pos), "{:.1f}p".format(elec_tracker_price_tomorrow), inky_display.BLACK, font)
+        symbol, colour = price_diff_to_symbol(elec_tracker_price_today, elec_tracker_price_tomorrow)
+        font = ImageFont.truetype(RobotoMedium, size=int(15 * font_scale_factor))
+        draw.text((x_pos + 60 * x_scale_factor, y_pos + 3 * y_scale_factor), symbol, colour, font)
         print("Electricity Tracker price tomorrow: {:.2f}p".format(elec_tracker_price_tomorrow))
 
-
     if check == 2 or check == 3: # we have gas data for tomorrow
+        font = ImageFont.truetype(RobotoMedium, size=int(20 * font_scale_factor))
         x_pos = 4 * x_scale_factor
         y_pos = 75 * y_scale_factor
         draw.text((x_pos, y_pos), "{:.1f}p".format(gas_tracker_price_tomorrow), inky_display.BLACK, font)
+        symbol, colour = price_diff_to_symbol(gas_tracker_price_today, gas_tracker_price_tomorrow)
+        font = ImageFont.truetype(RobotoMedium, size=int(15 * font_scale_factor))
+        draw.text((x_pos + 60 * x_scale_factor, y_pos + 3 * y_scale_factor), symbol, colour, font)
         print("Gas Tracker price tomorrow: {:.2f}p".format(gas_tracker_price_tomorrow))
 
     font = ImageFont.truetype(RobotoMedium, size=int(15 * font_scale_factor))
