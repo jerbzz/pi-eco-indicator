@@ -50,6 +50,12 @@ def update_blinkt(conf: dict, blinkt_data: dict, demo: bool):
             short_unit = "p"
             data_name = "Export"
 
+        if conf['Mode'] == "tracker":
+            tuple_idx = 1
+            short_unit = "p"
+            data_name = "Tracker"
+            raise SystemExit("Tracker not yet implemented on Blinkt!")
+
         slots_per_pixel = conf['Blinkt']['SlotsPerPixel']
 
         print("Displaying " + str(slots_per_pixel) + " slots per Blinkt! pixel.")
@@ -73,7 +79,7 @@ def update_blinkt(conf: dict, blinkt_data: dict, demo: bool):
         blinkt_data = new_data
 
         if len(blinkt_data) < 8:
-            print('Not enough data to fill the display - we will get dark pixels.')
+            print("Not enough data to fill the display - we will get dark pixels.")
 
         blinkt.clear()
         i = 0
@@ -92,6 +98,192 @@ def update_blinkt(conf: dict, blinkt_data: dict, demo: bool):
         print("Setting display...")
         blinkt.set_clear_on_exit(False)
         blinkt.show()
+
+def update_inky_tracker(conf: dict, inky_data: dict, demo: bool):
+    """Recieve a parsed configuration file and price/carbon data from the database,
+    as well as a flag indicating demo mode, and then update the Inky
+    display appropriately.
+
+    Notes: list 'inky_data' as passed from update_display.py is an ordered
+    list of tuples. In each tuple, index [0] is the time in SQLite date
+    format, index [1] is the electricity price in p/kWh as a float, index [2]
+    is blank as it would be the carbon intensity, and index [3] is the gas price."""
+
+    from datetime import datetime
+    from datetime import timedelta
+    from PIL import Image, ImageFont, ImageDraw
+    from font_roboto import RobotoMedium, RobotoBlack
+    from inky.auto import auto
+    from inky.eeprom import read_eeprom
+
+    def price_diff_to_symbol(price_today: float, price_tomorrow: float) -> tuple[str, int]:
+
+        diff = price_tomorrow - price_today
+        change = diff / price_today
+
+        if change == 0:
+            return "( - )", inky_display.BLACK
+        elif 0 < change < 0.1:
+            return "( ^ )", inky_display.BLACK
+        elif change >= 0.1:
+            return "( ^^ )", inky_display.RED
+        elif 0 > change > -0.1:
+            return "( v )", inky_display.BLACK
+        elif change <= -0.1:
+            return "( vv )", inky_display.RED
+        else:
+            return "bork", inky_display.RED
+
+    if demo:
+        raise SystemExit("Demo mode not implemented!")
+
+    inky_eeprom = read_eeprom()
+
+    if inky_eeprom is None:
+        raise SystemExit("Error: Inky pHAT display not found")
+
+    try:
+        # detect display type automatically
+        inky_display = auto(ask_user=False, verbose=True)
+    except TypeError as inky_version:
+        raise TypeError("You need to update the Inky library to >= v1.1.0") from inky_version
+
+    img = Image.new("P", (inky_display.WIDTH, inky_display.HEIGHT))
+    draw = ImageDraw.Draw(img)
+
+    # deal with scaling for newer SSD1608 pHATs
+    if inky_display.resolution == (250, 122):
+        font_scale_factor = 1.2
+        x_scale_factor = 1.25
+        y_scale_factor = 1.25
+
+    # original Inky pHAT
+    if inky_display.resolution == (212, 104):
+        font_scale_factor = 1
+        x_scale_factor = 1
+        y_scale_factor = 1
+
+    today = datetime.now().date()
+    print("Today is " + today.strftime("%a %-d %b %Y"))
+
+    tracker_latest_date = datetime.strptime(inky_data[0][0], "%Y-%m-%d %H:%M:%S") + timedelta(hours = 12)
+    tracker_latest_date = tracker_latest_date.date()
+    datedif = tracker_latest_date - today
+
+    check = 0 # 0 = nothing for tomorrow.
+              # 1 = elec, but no gas
+              # 2 = gas, but no elec
+              # 3 = both gas and elec for tomorrow
+
+    if datedif.days > 1 or datedif.days < 0:
+        raise SystemExit("Error: impossible date difference of " + str(datedif) + " days!")
+
+    elif datedif.days == 0: # no database entry for today so no data yet at all
+        print("We don't have any data for tomorrow yet.")
+        elec_tracker_price_today = inky_data[0][1]
+        gas_tracker_price_today = inky_data[0][3]
+        check = 0
+
+    elif datedif.days == 1: # there is either gas, electricity, or both.
+        elec_tracker_price_tomorrow = inky_data[0][1]
+        elec_tracker_price_today = inky_data[1][1]
+        gas_tracker_price_tomorrow = inky_data[0][3]
+        gas_tracker_price_today = inky_data[1][3]
+
+        if isinstance(elec_tracker_price_tomorrow, float):
+            check = check + 1
+
+        if isinstance(gas_tracker_price_tomorrow, float):
+            check = check + 2
+
+        if check == 0:
+            raise SystemExit("Error: we seem to have a database entry for tomorrow"
+                              "but there doesn't seem to be valid data in it.")
+    else:
+        raise SystemExit("Epic Fail. If we got here, mathematics itself is broken.")
+
+    # draw info and today's date
+
+    font = ImageFont.truetype(RobotoMedium, size=int(20 * font_scale_factor))
+    x_pos = 4 * x_scale_factor
+    y_pos = 0 * y_scale_factor
+    draw.text((x_pos, y_pos), "Gas", inky_display.BLACK, font)
+    x_pos = (inky_display.WIDTH) - (40 * x_scale_factor)
+    draw.text((x_pos, y_pos), "Elec", inky_display.BLACK, font)
+
+    font = ImageFont.truetype(RobotoBlack, size=int(15 * font_scale_factor))
+    date_string = today.strftime("%a %-d %b")
+    width, height = draw.textsize(date_string, font)
+    x_pos = (inky_display.WIDTH / 2) - (width / 2)
+    draw.text((x_pos, y_pos), date_string, inky_display.BLACK, font)
+
+    # draw separator line
+
+    x_pos = inky_display.WIDTH / 2
+    draw.line((x_pos, 20 * y_scale_factor, x_pos, inky_display.HEIGHT - 5),
+          fill=inky_display.BLACK, width=2)
+
+    # draw today's prices
+
+    font = ImageFont.truetype(RobotoBlack, size=int(35 * font_scale_factor))
+    x_pos = 4 * x_scale_factor
+    y_pos = 20 * y_scale_factor
+    draw.text((x_pos, y_pos), "{:.1f}p".format(gas_tracker_price_today), inky_display.RED, font)
+    x_pos = inky_display.WIDTH - (95 * x_scale_factor)
+    draw.text((x_pos, y_pos), "{:.1f}p".format(elec_tracker_price_today), inky_display.RED, font)
+    print("Electricity Tracker price today: {:.2f}p".format(elec_tracker_price_today))
+    print("Gas Tracker price today: {:.2f}p".format(gas_tracker_price_today))
+
+    # draw "Tomorrow" labels
+
+    font = ImageFont.truetype(RobotoMedium, size=int(15 * font_scale_factor))
+    x_pos = 4 * x_scale_factor
+    y_pos = 60 * y_scale_factor
+    draw.text((x_pos, y_pos), "Tomorrow:", inky_display.BLACK, font)
+    x_pos = inky_display.WIDTH - (95 * x_scale_factor)
+    draw.text((x_pos, y_pos), "Tomorrow:", inky_display.BLACK, font)
+
+    # draw tomorrow's data or draw a placeholder
+
+    if check == 1 or check == 3: # we have electricity data for tomorrow
+        font = ImageFont.truetype(RobotoMedium, size=int(20 * font_scale_factor))
+        x_pos = inky_display.WIDTH - (95 * x_scale_factor)
+        y_pos = 75 * y_scale_factor
+        draw.text((x_pos, y_pos), "{:.1f}p".format(elec_tracker_price_tomorrow), inky_display.BLACK, font)
+        symbol, colour = price_diff_to_symbol(elec_tracker_price_today, elec_tracker_price_tomorrow)
+        font = ImageFont.truetype(RobotoMedium, size=int(15 * font_scale_factor))
+        draw.text((x_pos + 60 * x_scale_factor, y_pos + 3 * y_scale_factor), symbol, colour, font)
+        print("Electricity Tracker price tomorrow: {:.2f}p".format(elec_tracker_price_tomorrow))
+
+    if check == 2 or check == 3: # we have gas data for tomorrow
+        font = ImageFont.truetype(RobotoMedium, size=int(20 * font_scale_factor))
+        x_pos = 4 * x_scale_factor
+        y_pos = 75 * y_scale_factor
+        draw.text((x_pos, y_pos), "{:.1f}p".format(gas_tracker_price_tomorrow), inky_display.BLACK, font)
+        symbol, colour = price_diff_to_symbol(gas_tracker_price_today, gas_tracker_price_tomorrow)
+        font = ImageFont.truetype(RobotoMedium, size=int(15 * font_scale_factor))
+        draw.text((x_pos + 60 * x_scale_factor, y_pos + 3 * y_scale_factor), symbol, colour, font)
+        print("Gas Tracker price tomorrow: {:.2f}p".format(gas_tracker_price_tomorrow))
+
+    font = ImageFont.truetype(RobotoMedium, size=int(15 * font_scale_factor))
+
+    if check == 0 or check == 1: # we don't have gas data for tomorrow
+        x_pos = 4 * x_scale_factor
+        y_pos = 75 * y_scale_factor
+        draw.text((x_pos, y_pos), "No data yet.", inky_display.BLACK, font)
+        print("No gas data for tomorrow yet.")
+
+    if check == 0 or check == 2: # we don't have electricity data for tomorrow
+        x_pos = inky_display.WIDTH - (95 * x_scale_factor)
+        y_pos = 75 * y_scale_factor
+        draw.text((x_pos, y_pos), "No data yet.", inky_display.BLACK, font)
+        print("No electricity data for tomorrow yet.")
+
+    if conf['InkyPHAT']['DisplayOrientation'] == 'inverted':
+        img=img.rotate(180)
+
+    inky_display.set_image(img)
+    inky_display.show()
 
 def update_inky(conf: dict, inky_data: dict, demo: bool):
     """Recieve a parsed configuration file and price/carbon data from the database,
@@ -118,7 +310,7 @@ def update_inky(conf: dict, inky_data: dict, demo: bool):
     inky_eeprom = read_eeprom()
 
     if inky_eeprom is None:
-        raise SystemExit('Error: Inky pHAT display not found')
+        raise SystemExit("Error: Inky pHAT display not found")
 
     local_tz = get_localzone()
 
@@ -436,7 +628,7 @@ def update_inky(conf: dict, inky_data: dict, demo: bool):
                       inky_display.BLACK)
 
     # Flip orientation if option is set
-    if conf['DisplayOrientation'] == 'inverted':
+    if conf['InkyPHAT']['DisplayOrientation'] == 'inverted':
         img=img.rotate(180)
 
     inky_display.set_image(img)
@@ -533,15 +725,16 @@ def get_config(filename: str) -> dict:
     elif _config['DisplayType'] == 'inkyphat':
         print('Inky pHAT display selected.')
 
-        if 'DisplayOrientation' not in _config:
-            _config['DisplayOrientation'] = 'standard'
+        if 'DisplayOrientation' not in _config['InkyPHAT']:
+            _config['InkyPHAT']['DisplayOrientation'] = 'standard'
             print('Standard display orientation.')
-        elif _config['DisplayOrientation'] == 'standard':
+        elif _config['InkyPHAT']['DisplayOrientation'] == 'standard':
             print('Standard display orientation.')
-        elif _config['DisplayOrientation'] == 'inverted':
+        elif _config['InkyPHAT']['DisplayOrientation'] == 'inverted':
             print('Inverted display orientation.')
         else:
-            raise SystemExit('Error: Unknown display orientation found in ' + filename + ': ' + _config['DisplayOrientation'])
+            raise SystemExit('Error: Unknown display orientation found in ' + 
+                  filename + ': ' + _config['InkyPHAT']['DisplayOrientation'])
 
         conf_highprice = deep_get(_config, ['InkyPHAT', 'HighPrice'])
         if not (isinstance(conf_highprice, (int, float)) and 0 <= conf_highprice <= 35):
@@ -592,6 +785,8 @@ def get_config(filename: str) -> dict:
         print('Working in Octopus Agile export mode.')
     elif _config['Mode'] == 'carbon':
         print('Working in carbon intensity mode.')
+    elif _config['Mode'] == 'tracker':
+        print('Working in Octopus Tracker mode.')
     else:
         raise SystemExit('Error: Unknown mode found in ' + filename + ': ' + _config['Mode'])
 

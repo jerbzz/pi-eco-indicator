@@ -10,7 +10,7 @@ import os
 import sys
 import time
 from reprlib import Repr
-from datetime import datetime
+from datetime import datetime, timedelta
 from urllib.request import pathname2url
 import pytz
 import requests
@@ -30,6 +30,9 @@ AGILE_EXPORT = ('AGILE-OUTGOING-19-05-13/electricity-tariffs/E-1R-AGILE-OUTGOING
 AGILE_REGIONS = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'P', 'N', 'J', 'H', 'K', 'L', 'M']
 
 AGILE_API_TAIL = "/standard-unit-rates/"
+
+TRACKER_ELECTRICITY = 'SILVER-VAR-22-10-21/electricity-tariffs/E-1R-SILVER-VAR-22-10-21-'
+TRACKER_GAS = 'SILVER-VAR-22-10-21/gas-tariffs/G-1R-SILVER-VAR-22-10-21-'
 
 CARBON_API_BASE = ('https://api.carbonintensity.org.uk')
 
@@ -107,7 +110,7 @@ def get_data_from_api(_request_uri: str) -> dict:
             if args.print: print(response.json())
             return response.json()
 
-def insert_data(data: dict):
+def insert_data(data: dict, is_gas: bool):
     """Insert our data records one by one, keep track of how many were successfully inserted
     and print the results of the insertion."""
 
@@ -117,7 +120,22 @@ def insert_data(data: dict):
         for result in data['results']:
             # insert_record returns false if it was a duplicate record
             # or true if a record was successfully entered.
-            if insert_record(result['valid_from'], result['value_inc_vat']):
+            if insert_record(result['valid_from'], result['value_inc_vat'], is_gas):
+                num_rows_inserted += 1
+
+        if num_rows_inserted > 0:
+            lastslot = datetime.strftime(datetime.strptime(
+                data['results'][0]['valid_to'], "%Y-%m-%dT%H:%M:%SZ"), "%H:%M on %A %d %b")
+            print(str(num_rows_inserted) + ' prices were inserted, ending at ' + lastslot + '.')
+        else:
+            print('No prices were inserted - maybe we have them'
+                  ' already, or Octopus are late with their update.')
+
+    if config['Mode'] == "tracker":
+        for result in data['results']:
+            # insert_record returns false if it was a duplicate record
+            # or true if a record was successfully entered.
+            if insert_record(result['valid_from'], result['value_inc_vat'], is_gas):
                 num_rows_inserted += 1
 
         if num_rows_inserted > 0:
@@ -135,7 +153,7 @@ def insert_data(data: dict):
             carbon_data = data['data']['data']
 
         for result in carbon_data:
-            if insert_record(result['from'], result['intensity']['forecast']):
+            if insert_record(result['from'], result['intensity']['forecast'], is_gas):
                 num_rows_inserted += 1
 
         if num_rows_inserted > 0:
@@ -147,7 +165,7 @@ def insert_data(data: dict):
             print('No values were inserted - maybe we have them'
                   ' already, or carbonintensity.org.uk are late with their update.')
 
-def insert_record(valid_from: str, data_value: float) -> bool:
+def insert_record(valid_from: str, data_value: float, is_gas: bool) -> bool:
     """Assuming we still have a cursor, take a tuple and stick it into the database.
        Return False if it was a duplicate record (not inserted) and True if a record
        was successfully inserted."""
@@ -173,6 +191,38 @@ def insert_record(valid_from: str, data_value: float) -> bool:
 
         else:
             return True # the record was inserted
+
+    if config['Mode'] == "tracker":
+        # make the date/time work for SQLite, it's picky about the format,
+        # easier to use the built in SQLite datetime functions
+        # when figuring out what records we want rather than trying to roll our own
+        valid_from_formatted = datetime.strftime(
+            datetime.strptime(valid_from, "%Y-%m-%dT%H:%M:%SZ"), "%Y-%m-%d %H:%M:%S")
+
+        data_tuple = (valid_from_formatted, data_value)
+        # print(data_tuple) # debug
+
+        if is_gas:
+            try:
+                cursor.execute(
+                    "INSERT INTO 'eco'('valid_from', 'gas_value_inc_vat') VALUES (?, ?) ON CONFLICT(valid_from) DO UPDATE SET gas_value_inc_vat=excluded.gas_value_inc_vat;", data_tuple)
+
+            except sqlite3.Error as error:
+                raise SystemError('Database error: ' + str(error)) from error
+
+            else:
+                return True # the record was inserted
+        elif not is_gas:
+            try:
+                cursor.execute(
+                    "INSERT INTO 'eco'('valid_from', 'value_inc_vat') VALUES (?, ?) ON CONFLICT(valid_from) DO UPDATE SET value_inc_vat=excluded.value_inc_vat;", data_tuple)
+
+            except sqlite3.Error as error:
+                raise SystemError('Database error: ' + str(error)) from error
+
+            else:
+                return True # the record was inserted
+
 
     if config['Mode'] == 'carbon':
         valid_from_formatted = datetime.strftime(
@@ -220,6 +270,25 @@ config = eco_indicator.get_config(conf_file)
 # print('config: ') # debug
 # print(config) # debug
 
+try:
+    # connect to the database in rw mode so we can catch the error if it doesn't exist
+    DB_URI = 'file:{}?mode=rw'.format(pathname2url('eco_indicator.sqlite'))
+    conn = sqlite3.connect(DB_URI, uri=True)
+    cursor = conn.cursor()
+    print('Connected to database...')
+
+except sqlite3.OperationalError:
+    # handle missing database case
+    print('No database found. Creating a new one...')
+    conn = sqlite3.connect('eco_indicator.sqlite')
+    cursor = conn.cursor()
+    # UNIQUE constraint prevents duplication of data on multiple runs of this script
+    # ON CONFLICT FAIL allows us to count how many times this happens
+    cursor.execute('CREATE TABLE eco (valid_from STRING PRIMARY KEY ON CONFLICT REPLACE, '
+                   'value_inc_vat REAL, intensity REAL, gas_value_inc_vat REAL)')
+    conn.commit()
+    print('Database created... ')
+
 if config['Mode'] == 'agile_import':
     DNO_REGION = config['DNORegion']
     AGILE_CAP = config['AgileCap']
@@ -244,7 +313,8 @@ if config['Mode'] == 'agile_import':
 
     # Build the API for the request - public API so no authentication required
     request_uri = (AGILE_API_BASE + AGILE_VERSION + DNO_REGION + AGILE_API_TAIL)
-    # print(request_uri) # debug
+    data_rows = get_data_from_api(request_uri)
+    insert_data(data_rows, False)
 
 elif config['Mode'] == 'carbon':
     DNO_REGION = config['DNORegion']
@@ -258,6 +328,8 @@ elif config['Mode'] == 'carbon':
     request_time = datetime.now().astimezone(pytz.utc).isoformat()
     request_uri = (CARBON_API_BASE + CARBON_REGIONS[DNO_REGION])
     request_uri = request_uri.format(from_time=request_time)
+    data_rows = get_data_from_api(request_uri)
+    insert_data(data_rows, False)
 
 elif config['Mode'] == 'agile_export':
     DNO_REGION = config['DNORegion']
@@ -269,35 +341,42 @@ elif config['Mode'] == 'agile_export':
 
     # Build the API for the request - public API so no authentication required
     request_uri = (AGILE_API_BASE + AGILE_EXPORT + DNO_REGION + AGILE_API_TAIL)
+    data_rows = get_data_from_api(request_uri)
+    insert_data(data_rows, False)
+
+elif config['Mode'] == 'tracker':
+
+    DNO_REGION = config['DNORegion']
+
+    if DNO_REGION in AGILE_REGIONS:
+        print('Selected region ' + DNO_REGION)
+    else:
+        raise SystemExit('Error: DNO region ' + DNO_REGION + ' is not a valid choice.')
+
+    # Build the API for the request - public API so no authentication required
+    request_uri = (AGILE_API_BASE + TRACKER_ELECTRICITY + DNO_REGION + AGILE_API_TAIL)
+
+    period_from = datetime.now() - timedelta(days=1)
+    period_from = period_from.strftime("%Y-%m-%dT%H:%M:%SZ")
+
+    period_to = datetime.now() + timedelta(days=2)
+    period_to = period_to.strftime("%Y-%m-%dT%H:%M:%SZ")
+
+    request_uri = request_uri + "?period_from=" + period_from + "&period_to=" + period_to
+
+    data_rows = get_data_from_api(request_uri)
+    insert_data(data_rows, False)
+
+    request_uri = (AGILE_API_BASE + TRACKER_GAS + DNO_REGION + AGILE_API_TAIL)
+    request_uri = request_uri + "?period_from=" + period_from + "&period_to=" + period_to
+
+    data_rows = get_data_from_api(request_uri)
+    insert_data(data_rows, True)
 
 else:
     raise SystemExit('Error: Invalid mode ' + config['Mode'] + ' passed to store_data.py')
 
-try:
-    # connect to the database in rw mode so we can catch the error if it doesn't exist
-    DB_URI = 'file:{}?mode=rw'.format(pathname2url('eco_indicator.sqlite'))
-    conn = sqlite3.connect(DB_URI, uri=True)
-    cursor = conn.cursor()
-    print('Connected to database...')
-
-except sqlite3.OperationalError:
-    # handle missing database case
-    print('No database found. Creating a new one...')
-    conn = sqlite3.connect('eco_indicator.sqlite')
-    cursor = conn.cursor()
-    # UNIQUE constraint prevents duplication of data on multiple runs of this script
-    # ON CONFLICT FAIL allows us to count how many times this happens
-    cursor.execute('CREATE TABLE eco (valid_from STRING PRIMARY KEY ON CONFLICT REPLACE, '
-                   'value_inc_vat REAL, intensity REAL)')
-    conn.commit()
-    print('Database created... ')
-
-data_rows = get_data_from_api(request_uri)
-# print(data_rows) # debug
-
-insert_data(data_rows)
-
-remove_old_data('2 days')
+remove_old_data('3 days')
 
 # finish up the database operation
 if conn:

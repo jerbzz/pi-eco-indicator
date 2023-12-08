@@ -40,7 +40,7 @@ except sqlite3.OperationalError as error:
 
 config = eco_indicator.get_config(conf_file)
 
-if config['Mode'] == 'agile_import' or config['Mode'] == 'agile_export':
+if 'agile' in config['Mode'] or config['Mode'] == 'tracker':
     field_name = 'value_inc_vat'
 
 elif config['Mode'] == 'carbon':
@@ -49,7 +49,11 @@ elif config['Mode'] == 'carbon':
 else:
     raise SystemExit('Error: invalid mode ' + config['Mode'] + ' in config.')
 
-cursor.execute("SELECT * FROM eco WHERE valid_from > datetime('now', '-30 minutes') AND " + field_name + " IS NOT NULL")
+if config['Mode'] == "tracker":
+    cursor.execute("SELECT * FROM eco ORDER BY valid_from DESC")
+else:
+    cursor.execute("SELECT * FROM eco WHERE valid_from > datetime('now', '-30 minutes') AND " + field_name + " IS NOT NULL")
+
 data_rows = cursor.fetchall()
 
 if len(data_rows) == 0:
@@ -59,7 +63,10 @@ if config['DisplayType'] == 'blinkt':
     eco_indicator.update_blinkt(config, data_rows, args.demo)
 
 elif config['DisplayType'] == 'inkyphat':
-    eco_indicator.update_inky(config, data_rows, args.demo)
+    if 'agile' in config['Mode'] or config['Mode'] == 'carbon':
+        eco_indicator.update_inky(config, data_rows, args.demo)
+    elif config['Mode'] == 'tracker':
+        eco_indicator.update_inky_tracker(config, data_rows, args.demo)
 
 else:
     raise SystemExit('Error: invalid display type ' + config['DisplayType'] + 'in config.')
