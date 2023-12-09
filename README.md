@@ -40,7 +40,7 @@ pip3 install font-roboto
 Once you have installed the Pimoroni software as above, the easiest way to download this software is to copy and paste the following command, which will make a copy of all the files in a folder called **pi-eco-indicator** in your home directory. This won't work unless you've installed the Blinkt! library above (or installed `git` yourself).
 
 ```
-cd ~ && git -c advice.detachedHead=false clone --depth 1 -b v2.2.2 https://github.com/jerbzz/pi-eco-indicator.git
+cd ~ && git -c advice.detachedHead=false clone --depth 1 -b v2.5.0 https://github.com/jerbzz/pi-eco-indicator.git
 ```
 # How to use this code
 
