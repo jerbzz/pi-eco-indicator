@@ -319,8 +319,8 @@ def update_inky(conf: dict, inky_data: dict, demo: bool):
         inky_display = auto(ask_user=False, verbose=True)
     except TypeError as inky_version:
         raise TypeError("You need to update the Inky library to >= v1.1.0") from inky_version
-
-    img = Image.new("P", (inky_display.WIDTH, inky_display.HEIGHT))
+    #make an image framebuffer, explicit background colour of white (required for some Inky displays)
+    img = Image.new("P", (inky_display.WIDTH, inky_display.HEIGHT), inky_display.WHITE)
     draw = ImageDraw.Draw(img)
 
     # deal with scaling for newer SSD1608 pHATs
@@ -336,6 +336,13 @@ def update_inky(conf: dict, inky_data: dict, demo: bool):
         x_scale_factor = 1
         y_scale_factor = 1
         graph_x_width = 126 * x_scale_factor
+
+    # Inky Impression 7.3
+    if inky_display.resolution == (800, 480):
+        font_scale_factor = 2
+        x_scale_factor = 3
+        y_scale_factor = 2
+        graph_x_width = 126 * x_scale_factor    
 
     data_duration = conf['InkyPHAT']['DataDuration']
     graph_x_unit = graph_x_width / (data_duration * 2) # half hour slots!
