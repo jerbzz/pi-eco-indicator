@@ -148,7 +148,7 @@ def update_inky_tracker(conf: dict, inky_data: dict, demo: bool):
     except TypeError as inky_version:
         raise TypeError("You need to update the Inky library to >= v1.1.0") from inky_version
 
-    img = Image.new("P", (inky_display.WIDTH, inky_display.HEIGHT))
+    img = Image.new("P", (inky_display.WIDTH, inky_display.HEIGHT), inky_display.WHITE)
     draw = ImageDraw.Draw(img)
 
     # deal with scaling for newer SSD1608 pHATs
@@ -162,6 +162,13 @@ def update_inky_tracker(conf: dict, inky_data: dict, demo: bool):
         font_scale_factor = 1
         x_scale_factor = 1
         y_scale_factor = 1
+
+    # Inky Impression 7.3
+    if inky_display.resolution == (800, 480):
+        font_scale_factor = 2
+        x_scale_factor = 3
+        y_scale_factor = 2
+        graph_x_width = 126 * x_scale_factor    
 
     today = datetime.now().date()
     print("Today is " + today.strftime("%a %-d %b %Y"))
@@ -524,6 +531,8 @@ def update_inky(conf: dict, inky_data: dict, demo: bool):
     x_pos = 130 * x_scale_factor
     y_pos = 10 * y_scale_factor + (3 * 18 * y_scale_factor)
     font = ImageFont.truetype(RobotoMedium, size=int(13 * font_scale_factor))
+
+
 
     if conf['Mode'] == "agile_import" or conf['Mode'] == "carbon":
         if '.' in str(low_slot_duration):
