@@ -19,11 +19,7 @@ import eco_indicator
 
 AGILE_API_BASE = ('https://api.octopus.energy/v1/products/')
 
-AGILE_IMPORT_35 = ('AGILE-18-02-21/electricity-tariffs/E-1R-AGILE-18-02-21-')
-AGILE_IMPORT_55 = ('AGILE-22-07-22/electricity-tariffs/E-1R-AGILE-22-07-22-')
-AGILE_IMPORT_78 = ('AGILE-22-08-31/electricity-tariffs/E-1R-AGILE-22-08-31-')
-AGILE_IMPORT_VAR_100 = ('AGILE-VAR-22-10-19/electricity-tariffs/E-1R-AGILE-VAR-22-10-19-')
-AGILE_IMPORT_FLEX_100 = ('AGILE-FLEX-22-11-25/electricity-tariffs/E-1R-AGILE-FLEX-22-11-25-')
+AGILE_IMPORT_FLEX_100 = ('AGILE-24-04-03/electricity-tariffs/E-1R-AGILE-24-04-03-')
 
 AGILE_EXPORT = ('AGILE-OUTGOING-19-05-13/electricity-tariffs/E-1R-AGILE-OUTGOING-19-05-13-')
 
