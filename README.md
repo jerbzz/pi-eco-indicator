@@ -15,6 +15,7 @@ The Inky display looks like this in carbon mode, and very similar in Agile mode.
 
 - [Pimoroni Blinkt!](https://shop.pimoroni.com/products/blinkt), or a [Pimoroni Inky pHAT](https://shop.pimoroni.com/products/inky-phat).
 - A Raspberry Pi of any flavour, as long as you can connect the display to it, and it can connect to the internet. This software has been tested on a Pi Zero W and a Pi 3B+.
+- NB: DECEMBER 2025 - It's getting tricky to install the required dependencies (particularly Pillow) on the Pi Zero. Will update again soon but I think it may be time to put them out to pasture.
 
 # Software needed
 
