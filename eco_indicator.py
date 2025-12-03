@@ -483,11 +483,20 @@ def update_inky(conf: dict, inky_data: dict, demo: bool):
 
         bar_y_height = slot_data[tuple_idx] * graph_y_unit
 
-        draw.rectangle(((i + 1) * graph_x_unit, graph_bottom,
-                        (((i + 1) * graph_x_unit) - graph_x_unit),
-                        (graph_bottom - bar_y_height)), colour)
+        x0 = (i + 1) * graph_x_unit
+        y0 = graph_bottom
+        x1 = i * graph_x_unit
+        y1 = graph_bottom - bar_y_height
+
+        if x1 < x0:
+            x0, x1 = x1, x0
+        if y1 < y0:
+            y0, y1 = y1, y0
+
+        draw.rectangle([x0, y0, x1, y1], colour)
+
         i += 1
-    # graph solid bars finished
+        # graph solid bars finished
 
     # draw time info above current price...
     font = ImageFont.truetype(RobotoMedium, size=int(15 * font_scale_factor))
