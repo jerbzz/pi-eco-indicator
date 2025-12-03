@@ -628,7 +628,7 @@ def update_inky(conf: dict, inky_data: dict, demo: bool):
         font = ImageFont.truetype(RobotoMedium, size=int(10 * font_scale_factor))
         x_pos = i * graph_x_unit * 2 # it's half hour slots!!
         hours = datetime.strftime(datetime.now() + timedelta(hours=i), "%H")
-        hours_w, hours_h = font.getsize(hours) # we want to centre the labels
+        _, _, hours_w, hours_h = font.getbbox(hours) # we want to centre the labels
         y_pos = graph_bottom + 1
         if x_pos + hours_w / 2 > 128 * x_scale_factor:
             break # don't draw past the end of the x axis
