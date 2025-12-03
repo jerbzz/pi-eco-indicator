@@ -19,7 +19,7 @@ import eco_indicator
 
 AGILE_API_BASE = ('https://api.octopus.energy/v1/products/')
 
-AGILE_IMPORT_FLEX_100 = ('AGILE-24-04-03/electricity-tariffs/E-1R-AGILE-24-04-03-')
+AGILE_IMPORT = ('AGILE-24-10-01/electricity-tariffs/E-1R-AGILE-24-10-01-')
 
 AGILE_EXPORT = ('AGILE-OUTGOING-19-05-13/electricity-tariffs/E-1R-AGILE-OUTGOING-19-05-13-')
 
@@ -287,28 +287,14 @@ except sqlite3.OperationalError:
 
 if config['Mode'] == 'agile_import':
     DNO_REGION = config['DNORegion']
-    AGILE_CAP = config['AgileCap']
 
     if DNO_REGION in AGILE_REGIONS:
         print('Selected region ' + DNO_REGION)
     else:
         raise SystemExit('Error: DNO region ' + DNO_REGION + ' is not a valid choice.')
 
-    if AGILE_CAP == 35:
-        AGILE_VERSION = AGILE_IMPORT_35
-    elif AGILE_CAP == 55:
-        AGILE_VERSION = AGILE_IMPORT_55
-    elif AGILE_CAP == 78:
-        AGILE_VERSION = AGILE_IMPORT_78
-    elif AGILE_CAP == 100:
-        AGILE_VERSION = AGILE_IMPORT_VAR_100
-    elif AGILE_CAP == 101:
-        AGILE_VERSION = AGILE_IMPORT_FLEX_100
-    else:
-        raise SystemExit('Error: Agile cap of ' + str(AGILE_CAP) + ' refers to an unknown tariff.')
-
     # Build the API for the request - public API so no authentication required
-    request_uri = (AGILE_API_BASE + AGILE_VERSION + DNO_REGION + AGILE_API_TAIL)
+    request_uri = (AGILE_API_BASE + AGILE_IMPORT + DNO_REGION + AGILE_API_TAIL)
     data_rows = get_data_from_api(request_uri)
     insert_data(data_rows, False)
 
@@ -341,7 +327,6 @@ elif config['Mode'] == 'agile_export':
     insert_data(data_rows, False)
 
 elif config['Mode'] == 'tracker':
-
     DNO_REGION = config['DNORegion']
 
     if DNO_REGION in AGILE_REGIONS:
